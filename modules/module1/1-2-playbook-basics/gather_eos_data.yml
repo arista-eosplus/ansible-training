@@ -6,7 +6,7 @@
 
   tasks:
     - name: GATHER SWITCH FACTS
-      ios_facts:
+      eos_facts:
 
     - name: DISPLAY VERSION
       debug:
@@ -14,7 +14,7 @@
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
       eos_command:
