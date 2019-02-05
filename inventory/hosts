@@ -1,0 +1,21 @@
+[all:vars]
+ansible_port=22
+
+[arista:children]
+spines
+leafs
+hosts
+
+[spines]
+spine1 ansible_host=192.168.0.10
+spine2 ansible_host=192.168.0.11
+
+[leafs]
+leaf1 ansible_host=192.168.0.14
+leaf2 ansible_host=192.168.0.15
+leaf3 ansible_host=192.168.0.16
+leaf4 ansible_host=192.168.0.17
+
+[hosts]
+host1 ansible_host=192.168.0.31
+host2 ansible_host=192.168.0.32

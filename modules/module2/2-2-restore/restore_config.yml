@@ -1,0 +1,14 @@
+---
+- name: RESTORE CONFIGURATION
+  hosts: arista
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: COPY RUNNING CONFIG TO SWITCH
+      command: scp ./backup/{{inventory_hostname}}.config {{inventory_hostname}}:/{{inventory_hostname}}.config
+
+    - name: CONFIG REPLACE
+      eos_command:
+        commands:
+          - config replace flash:{{inventory_hostname}}.config force
