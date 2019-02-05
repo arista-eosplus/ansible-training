@@ -95,6 +95,21 @@ host2 ansible_host=192.168.0.32
 
 ```
 
+The inventory can also contain associated variables files located in the group_vars and host_vars directories. A group_vars file must have the same name as the group the variables are meant to be associated with. For example the group `[arista]` in the above hosts file can have a group_vars file named `arista`, `arista.yml`, or `arista.yaml`. An example can be seen in the `~/ansible-training/group_vars/arista` file.
+
+```
+
+[arista@ansible ~]$ cat ~/ansible-training/group_vars/arista
+ansible_connection: network_cli
+ansible_network_os: eos
+ansible_user: arista
+#ansible_ssh_pass: arista
+ansible_become: yes
+ansible_become_method: enable
+[arista@ansible ~]$
+
+```
+
 ## Step 5
 
 In the above output every `[ ]` defines a group. For example `[spines]` is a group that contains the hosts `spine1` and `spine2`. Groups can also be _nested_. The group `[arista]` is a parent group to the groups `[spines]`, `[leafs]` and `[hosts]`
@@ -105,17 +120,67 @@ In the above output every `[ ]` defines a group. For example `[spines]` is a gro
 > Note: A group called **all** always exists and contains all groups and hosts defined within an inventory.
 
 
-We can associate variables to groups and hosts. Host variables are declared/defined on the same line as the host themselves. For example for the host `spine1`:
+We can also associate variables to groups and hosts.
+
+Group variables can be declared/defined in a group:var block. For example `[arista:vars]`. An example can be seen in the `~/ansible-training/inventory/hosts_with_group_vars` file:
 
 ```
-spine1 ansible_host=52.90.196.252 ansible_ssh_user=arista extra_variable=172.16.165.205 ansible_network_os=eos
+
+[arista@ansible ~]$ cat ~/ansible-training/inventory/hosts_with_group_vars
+[all:vars]
+ansible_port=22
+
+[arista2:children]
+spines2
+leafs2
+hosts2
+
+[arista2:vars]
+ansible_connection=network_cli
+ansible_network_os=eos
+ansible_user=arista
+ansible_become=yes
+ansible_become_method=enable
+
+[spines2]
+spine1 ansible_host=192.168.0.10
+spine2 ansible_host=192.168.0.11
+
+[leafs2]
+leaf1 ansible_host=192.168.0.14
+leaf2 ansible_host=192.168.0.15
+leaf3 ansible_host=192.168.0.16
+leaf4 ansible_host=192.168.0.17
+
+[hosts2]
+host1 ansible_host=192.168.0.31
+host2 ansible_host=192.168.0.32
+[arista@ansible ~]$
+
+```
+
+Host variables are declared/defined on the same line as the host themselves. An example can be seen in the `~/ansible-training/inventory/hosts_with_host_vars` file:
+
+```
+
+[arista@ansible ~]$ cat ~/ansible-training/inventory/hosts_with_host_vars
+[all:vars]
+ansible_port=22
+
+[arista3:children]
+spines3
+
+[spines3]
+spine1 ansible_host=192.168.0.10 ansible_connection=network_cli ansible_network_os=eos ansible_user=arista ansible_become=yes ansible_become_method=enable extra_var=extra
+spine2 ansible_host=192.168.0.11 ansible_connection=network_cli ansible_network_os=eos ansible_user=arista ansible_become=yes ansible_become_method=enable extra_var=extra
+[arista@ansible ~]$
 
 ```
 
  - `spine1` - The name that Ansible will use.  This can but does not have to rely on DNS
  - `ansible_host` - The IP address that Ansible will use, if not configured it will default to DNS
- - `ansible_ssh_user` - The user Ansible will use to login to this host, if not configured it will default to the user the playbook is run from
- - `private_ip` - This value is not reserved by Ansible so it will default to a [host variable](http://docs.ansible.com/ansible/latest/intro_inventory.html#host-variables).  This variable can be used by playbooks or ignored completely.
+ - `ansible_user` - The user Ansible will use to login to this host, if not configured it will default to the user the playbook is run from
+ - `extra_var` - This value is not reserved by Ansible so it will default to a [host variable](http://docs.ansible.com/ansible/latest/intro_inventory.html#host-variables).  This variable can be used by playbooks or ignored completely.
 - `ansible_network_os` - This variable is necessary while using the `network_cli` connection type within a play definition, as we will see shortly.
 
 # Complete

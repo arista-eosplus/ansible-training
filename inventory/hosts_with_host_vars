@@ -1,28 +1,9 @@
 [all:vars]
 ansible_port=22
 
-[arista2:children]
-spines2
-leafs2
-hosts2
+[arista3:children]
+spines3
 
-[arista2:vars]
-ansible_connection=network_cli
-ansible_network_os=eos
-ansible_user=arista
-ansible_become=yes
-ansible_become_method=enable
-
-[spines2]
-spine1 ansible_host=192.168.0.10
-spine2 ansible_host=192.168.0.11
-
-[leafs2]
-leaf1 ansible_host=192.168.0.14
-leaf2 ansible_host=192.168.0.15
-leaf3 ansible_host=192.168.0.16
-leaf4 ansible_host=192.168.0.17
-
-[hosts2]
-host1 ansible_host=192.168.0.31
-host2 ansible_host=192.168.0.32
+[spines3]
+spine1 ansible_host=192.168.0.10 ansible_connection=network_cli ansible_network_os=eos ansible_user=arista ansible_become=yes ansible_become_method=enable
+spine2 ansible_host=192.168.0.11 ansible_connection=network_cli ansible_network_os=eos ansible_user=arista ansible_become=yes ansible_become_method=enable
