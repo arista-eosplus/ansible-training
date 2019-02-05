@@ -21,6 +21,6 @@
 
   tasks:
 
-    - name: ENSURE THAT SWITHES ARE SECURE
+    - name: PUSH GENERAL SWITCH CONFIGS
       eos_config:
         src: general_switch.cfg
