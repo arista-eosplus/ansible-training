@@ -14,4 +14,4 @@
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"

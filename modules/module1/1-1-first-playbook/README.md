@@ -30,7 +30,7 @@ Enter the following play definition into `gather_eos_data.yml`:
   gather_facts: no
 ```
 
-`---` indicates that this is a YAML file. We are running this playbook against the group `arista`, that was defined earlier in the inventory file. Playbooks related to network devices should use the connection plugin called `network_cli`. Ansible has different connection plugins that handle different connection interfaces. The `network_cli` plugin is written specifically for network equipment and handles things like ensuring a persistent SSH connection across multiple tasks.
+`---` indicates that this is a YAML file. We are running this playbook against the group `arista`, that was defined earlier in the inventory file. Playbooks related to network devices should use the connection plugin called `network_cli`. Ansible has different connection plugins that handle different connection interfaces. The `network_cli` plugin is written specifically for network equipment and handles things like ensuring a persistent SSH connection across multiple tasks. We have previously defined the `network_cli` variable in our host/variable files so it is not mandatory in the playbook.
 
 
 #### Step 3
@@ -73,17 +73,25 @@ The output should look as follows.
 
 PLAY [GATHER INFORMATION FROM SWITCHES] ******************************************************************
 
-TASK [GATHER SWITCH FACTS] ******************************************************************************
-ok: [rtr1]
-ok: [rtr4]
-ok: [rtr3]
-ok: [rtr2]
+TASK [GATHER SWITCH FACTS] ************************************************************************************************************
+ok: [spine1]
+ok: [leaf3]
+ok: [spine2]
+ok: [leaf2]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-PLAY RECAP **********************************************************************************************
-rtr1                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=0    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=3    changed=0    unreachable=0    failed=0
+host2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf1                      : ok=3    changed=0    unreachable=0    failed=0
+leaf2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf3                      : ok=3    changed=0    unreachable=0    failed=0
+leaf4                      : ok=3    changed=0    unreachable=0    failed=0
+spine1                     : ok=3    changed=0    unreachable=0    failed=0
+spine2                     : ok=3    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -94,7 +102,7 @@ rtr4                       : ok=1    changed=0    unreachable=0    failed=0
 #### Step 5
 
 
-The play ran successfully and executed against the 4 switches. But where is the output?! Re-run the playbook using the `-v` flag.
+The play ran successfully and executed against the 8 switches. But where is the output?! Re-run the playbook using the `-v` flag.
 
 > Note: Ansible has increasing level of verbosity. You can use up to 4 "v's", -vvvv.
 
@@ -106,7 +114,7 @@ Using /home/arista/ansible-training/ansible.cfg as config file
 PLAY [GATHER INFORMATION FROM SWITCHES] ******************************************************************
 
 TASK [GATHER SWITCH FACTS] ******************************************************************************
-ok: [rtr3] => {"ansible_facts": {"ansible_net_all_ipv4_addresses": ["10.100.100.3", "192.168.3.103", "172.16.235.46", "192.168.35.101", "10.3.3.103"], "ansible_net_all_ipv6_addresses": [], "ansible_net_filesystems": ["bootflash:"], "ansible_net_gather_subset": ["hardware", "default", "interfaces"], "ansible_net_hostname": "rtr3", "ansible_net_image": "boot:packages.conf", "ansible_net_interfaces": {"GigabitEthernet1": {"bandwidth": 1000000, "description": null, "duplex": "Full", "ipv4": [{"address": "172.16.235.46", "subnet": "16"}], "lineprotocol": "up ", "macaddress": "0e93.7710.e63c", "mediatype": "Virtual", "mtu": 1500, "operstatus": "up", "type": "CSR vNIC"}, "Loopback0": {"bandwidth": 8000000, "description": null, "duplex": null, "ipv4": [{"address": "192.168.3.103", "subnet": "24"}], "lineprotocol": "up ", "macaddress": "192.168.3.103/24", "mediatype": null, "mtu": 1514, "operstatus": "up", "type": null}, "Loopback1": {"bandwidth": 8000000, "description": null, "duplex": null, "ipv4": [{"address": "10.3.3.103", "subnet": "24"}], "lineprotocol": "up ", "macaddress": "10.3.3.103/24", "mediatype": null, "mtu": 1514, "operstatus": "up", "type": null}, "Tunnel0": {"bandwidth": 100, "description": null, "duplex": null, "ipv4": [{"address": "10.100.100.3", "subnet": "24"}]
+ok: [spine1] => {"ansible_facts": {"ansible_net_all_ipv4_addresses": ["192.168.0.10"], "ansible_net_all_ipv6_addresses": [], "ansible_net_filesystems": ["file:", "flash:", "system:"], "ansible_net_fqdn": "spine1.arista.test", "ansible_net_gather_subset": ["hardware", "default", "interfaces"], "ansible_net_hostname": "spine1", "ansible_net_image": null, "ansible_net_interfaces": {"Ethernet1": {"bandwidth": 0, "description": "", "duplex": "duplexFull", "ipv4": {}, "lineprotocol": "up", "macaddress": "5e:f4:4c:c2:c5:92", "mtu": 9214, "operstatus": "connected", "type": "bridged"}, "Ethernet10": {"bandwidth": 0, "description": "", "duplex": "duplexFull", "ipv4": {}, "lineprotocol": "up", "macaddress": "3a:af:f4:e0:f7:e0", "mtu": 9214, "operstatus": "connected", "type": "bridged"}, "Ethernet11": {"bandwidth": 0, "description": "", "duplex": "duplexFull", "ipv4": {}, "lineprotocol": "up", "macaddress": "62:78:4b:c6:a3:4b", "mtu": 9214, "operstatus": "connected", "type": "bridged"}, "Management1": {"bandwidth": 0, "description": "", "duplex": "duplexUnknown", "ipv4": {"address": "192.168.0.10", "masklen": 24}, "lineprotocol": "notPresent", "macaddress": "16:04:97:ff:0d:a7", "mtu": 1500, "operstatus": "notconnect", "type": "routed"}}, "ansible_net_memfree_mb": 3117, "ansible_net_memtotal_mb": 3884, "ansible_net_model": "vEOS", "ansible_net_neighbors": {"Ethernet1": [{"host": "spine2.arista.test", "port": "Ethernet1"}], "Ethernet2": [{"host": "leaf1.arista.test", "port": "Ethernet2"}], "Ethernet3": [{"host": "leaf2.arista.test", "port": "Ethernet2"}], "Ethernet4": [{"host": "leaf3.arista.test", "port": "Ethernet2"}], "Ethernet5": [{"host": "leaf4.arista.test", "port": "Ethernet2"}]}, "ansible_net_serialnum": "spine1", "ansible_net_version": "4.21.2F"}, "changed": false}
 
 .
 .
@@ -146,7 +154,6 @@ Running a playbook in verbose mode is a good option to validate the output from 
 Write 2 tasks that display the switches' OS version and hostname.
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -163,8 +170,7 @@ Write 2 tasks that display the switches' OS version and hostname.
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
-{%endraw%}        
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 ```
 
 
@@ -176,47 +182,79 @@ Now re-run the playbook but this time do not use the `verbose` flag and run it a
 
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts gather_eos_data.yml
 
-PLAY [GATHER INFORMATION FROM SWITCHES] ******************************************************************
+PLAY [GATHER INFORMATION FROM SWITCHES] ***********************************************************************************************
 
-TASK [GATHER SWITCH FACTS] ******************************************************************************
-ok: [rtr4]
-ok: [rtr1]
-ok: [rtr2]
-ok: [rtr3]
+TASK [GATHER SWITCH FACTS] ************************************************************************************************************
+ok: [leaf2]
+ok: [leaf1]
+ok: [spine1]
+ok: [leaf3]
+ok: [spine2]
+ok: [host1]
+ok: [leaf4]
+ok: [host2]
 
-TASK [DISPLAY VERSION] **********************************************************************************
-ok: [rtr4] => {
-    "msg": "The EOS version is: 16.08.01a"
+TASK [DISPLAY VERSION] ****************************************************************************************************************
+ok: [spine1] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr1] => {
-    "msg": "The EOS version is: 16.08.01a"
+ok: [spine2] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr2] => {
-    "msg": "The EOS version is: 16.08.01a"
+ok: [leaf2] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr3] => {
-    "msg": "The EOS version is: 16.08.01a"
+ok: [leaf1] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-
-TASK [DISPLAY HOSTNAME] ****************************************************************************
-ok: [rtr1] => {
-    "msg": "The hostname is:96F0LYYKYUZ"
+ok: [leaf3] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr4] => {
-    "msg": "The hostname is:94KZZ28ZT1Y"
+ok: [leaf4] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr2] => {
-    "msg": "The hostname is:9VBX7BSSLGS"
+ok: [host2] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
-ok: [rtr3] => {
-    "msg": "The hostname is:9OLKU6JWXRP"
+ok: [host1] => {
+    "msg": "The EOS version is: 4.21.2F"
 }
 
-PLAY RECAP **********************************************************************************************
-rtr1                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=3    changed=0    unreachable=0    failed=0   
+TASK [DISPLAY HOSTNAME] ***************************************************************************************************************
+ok: [spine2] => {
+    "msg": "The hostname is:spine2"
+}
+ok: [spine1] => {
+    "msg": "The hostname is:spine1"
+}
+ok: [leaf3] => {
+    "msg": "The hostname is:leaf3"
+}
+ok: [leaf2] => {
+    "msg": "The hostname is:leaf2"
+}
+ok: [leaf1] => {
+    "msg": "The hostname is:leaf1"
+}
+ok: [host2] => {
+    "msg": "The hostname is:host2"
+}
+ok: [leaf4] => {
+    "msg": "The hostname is:leaf4"
+}
+ok: [host1] => {
+    "msg": "The hostname is:host1"
+}
+
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=3    changed=0    unreachable=0    failed=0
+host2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf1                      : ok=3    changed=0    unreachable=0    failed=0
+leaf2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf3                      : ok=3    changed=0    unreachable=0    failed=0
+leaf4                      : ok=3    changed=0    unreachable=0    failed=0
+spine1                     : ok=3    changed=0    unreachable=0    failed=0
+spine2                     : ok=3    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
