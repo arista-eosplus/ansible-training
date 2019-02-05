@@ -52,19 +52,27 @@ Go ahead and run the playbook:
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts backup.yml
 
-PLAY [BACKUP SWITCH CONFIGURATIONS] *********************************************************************************************************************************************************
+PLAY [BACKUP SWITCH CONFIGURATIONS] ***************************************************************************************************
 
-TASK [BACKUP THE CONFIG] ********************************************************************************************************************************************************************
-ok: [rtr1]
-ok: [rtr3]
-ok: [rtr4]
-ok: [rtr2]
+TASK [BACKUP THE CONFIG] **************************************************************************************************************
+ok: [spine2]
+ok: [leaf2]
+ok: [leaf3]
+ok: [spine1]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=0    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=1    changed=0    unreachable=0    failed=0
+host2                      : ok=1    changed=0    unreachable=0    failed=0
+leaf1                      : ok=1    changed=0    unreachable=0    failed=0
+leaf2                      : ok=1    changed=0    unreachable=0    failed=0
+leaf3                      : ok=1    changed=0    unreachable=0    failed=0
+leaf4                      : ok=1    changed=0    unreachable=0    failed=0
+spine1                     : ok=1    changed=0    unreachable=0    failed=0
+spine2                     : ok=1    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -78,11 +86,15 @@ The playbook should now have created a directory called `backup`. Now, list the 
 
 ``` shell
 [arista@ansible ansible-training]$ ls -l backup
-total 1544
--rw-rw-r--. 1 arista arista 393514 Jun 19 12:45 rtr1_config.2018-06-19@12:45:36
--rw-rw-r--. 1 arista arista 393513 Jun 19 12:45 rtr2_config.2018-06-19@12:45:38
--rw-rw-r--. 1 arista arista 390584 Jun 19 12:45 rtr3_config.2018-06-19@12:45:37
--rw-rw-r--. 1 arista arista 390586 Jun 19 12:45 rtr4_config.2018-06-19@12:45:37
+total 32
+-rw-rw-r-- 1 arista arista 2457 Feb  5 20:43 host1_config.2019-02-05@20:43:05
+-rw-rw-r-- 1 arista arista 2308 Feb  5 20:43 host2_config.2019-02-05@20:43:08
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:43 leaf1_config.2019-02-05@20:43:02
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:43 leaf2_config.2019-02-05@20:43:02
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:43 leaf3_config.2019-02-05@20:43:02
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:43 leaf4_config.2019-02-05@20:43:05
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:43 spine1_config.2019-02-05@20:43:02
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:43 spine2_config.2019-02-05@20:43:02
 [arista@ansible ansible-training]$
 
 ```
@@ -98,7 +110,6 @@ In **Step 2** you captured the output of the task into a variable called `config
 
 
 ``` yaml
-{%raw%}
 ---
 - name: BACKUP SWITCH CONFIGURATIONS
   hosts: arista
@@ -115,7 +126,6 @@ In **Step 2** you captured the output of the task into a variable called `config
       copy:
         src: "{{config_output.backup_path}}"
         dest: "./backup/{{inventory_hostname}}.config"
-{%endraw%}
 ```
 
 
@@ -128,25 +138,37 @@ Re-run the playbook.
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts backup.yml
 
-PLAY [BACKUP SWITCH CONFIGURATIONS] *********************************************************************************************************************************************************
+PLAY [BACKUP SWITCH CONFIGURATIONS] ***************************************************************************************************
 
-TASK [BACKUP THE CONFIG] ********************************************************************************************************************************************************************
-ok: [rtr3]
-ok: [rtr4]
-ok: [rtr2]
-ok: [rtr1]
+TASK [BACKUP THE CONFIG] **************************************************************************************************************
+ok: [spine1]
+ok: [spine2]
+ok: [leaf3]
+ok: [leaf2]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-TASK [RENAME BACKUP] ************************************************************************************************************************************************************************
-changed: [rtr1]
-changed: [rtr4]
-changed: [rtr2]
-changed: [rtr3]
+TASK [RENAME BACKUP] ******************************************************************************************************************
+changed: [spine1]
+changed: [leaf3]
+changed: [leaf1]
+changed: [leaf2]
+changed: [spine2]
+changed: [leaf4]
+changed: [host2]
+changed: [host1]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=2    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=2    changed=1    unreachable=0    failed=0
+host2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf1                      : ok=2    changed=1    unreachable=0    failed=0
+leaf2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf3                      : ok=2    changed=1    unreachable=0    failed=0
+leaf4                      : ok=2    changed=1    unreachable=0    failed=0
+spine1                     : ok=2    changed=1    unreachable=0    failed=0
+spine2                     : ok=2    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -158,15 +180,23 @@ Once again list the contents of the `backup` directory:
 
 ``` shell
 [arista@ansible ansible-training]$ ls -l backup
-total 3088
--rw-rw-r--. 1 arista arista 393514 Jun 19 13:35 rtr1.config
--rw-rw-r--. 1 arista arista 393514 Jun 19 13:35 rtr1_config.2018-06-19@13:35:14
--rw-rw-r--. 1 arista arista 393513 Jun 19 13:35 rtr2.config
--rw-rw-r--. 1 arista arista 393513 Jun 19 13:35 rtr2_config.2018-06-19@13:35:13
--rw-rw-r--. 1 arista arista 390584 Jun 19 13:35 rtr3.config
--rw-rw-r--. 1 arista arista 390584 Jun 19 13:35 rtr3_config.2018-06-19@13:35:12
--rw-rw-r--. 1 arista arista 390586 Jun 19 13:35 rtr4.config
--rw-rw-r--. 1 arista arista 390586 Jun 19 13:35 rtr4_config.2018-06-19@13:35:13
+total 64
+-rw-rw-r-- 1 arista arista 2457 Feb  5 20:46 host1.config
+-rw-rw-r-- 1 arista arista 2457 Feb  5 20:46 host1_config.2019-02-05@20:46:01
+-rw-rw-r-- 1 arista arista 2308 Feb  5 20:46 host2.config
+-rw-rw-r-- 1 arista arista 2308 Feb  5 20:46 host2_config.2019-02-05@20:46:01
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:46 leaf1.config
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:45 leaf1_config.2019-02-05@20:45:58
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:46 leaf2.config
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:45 leaf2_config.2019-02-05@20:45:58
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:46 leaf3.config
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:45 leaf3_config.2019-02-05@20:45:58
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:46 leaf4.config
+-rw-rw-r-- 1 arista arista 2310 Feb  5 20:46 leaf4_config.2019-02-05@20:46:01
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:46 spine1.config
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:45 spine1_config.2019-02-05@20:45:58
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:46 spine2.config
+-rw-rw-r-- 1 arista arista 2312 Feb  5 20:45 spine2_config.2019-02-05@20:45:58
 [arista@ansible ansible-training]$
 
 ```
@@ -191,7 +221,6 @@ Write a new task using Ansible's `lineinfile` module to remove the first line.
 
 
 ``` yaml
-{%raw%}
 ---
 - name: BACKUP SWITCH CONFIGURATIONS
   hosts: arista
@@ -214,7 +243,6 @@ Write a new task using Ansible's `lineinfile` module to remove the first line.
         path: "./backup/{{inventory_hostname}}.config"
         line: "Building configuration..."
         state: absent
-{%endraw%}
 ```
 
 
@@ -227,7 +255,6 @@ Before we run the playbook, we need to add one more task to remove the second li
 
 
 ``` yaml
-{%raw%}
 ---
 - name: BACKUP SWITCH CONFIGURATIONS
   hosts: arista
@@ -256,7 +283,6 @@ Before we run the playbook, we need to add one more task to remove the second li
         path: "./backup/{{inventory_hostname}}.config"
         regexp: 'Current configuration.*'
         state: absent
-{%endraw%}                          
 ```
 
 
