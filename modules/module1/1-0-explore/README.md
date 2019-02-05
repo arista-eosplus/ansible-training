@@ -95,11 +95,11 @@ host2 ansible_host=192.168.0.32
 
 ```
 
-The inventory can also contain associated variables files located in the group_vars and host_vars directories. A group_vars file must have the same name as the group the variables are meant to be associated with. For example the group `[arista]` in the above hosts file can have a group_vars file named `arista`, `arista.yml`, or `arista.yaml`. An example can be seen in the `~/ansible-training/group_vars/arista` file.
+The inventory can also contain associated variables files located in the group_vars and host_vars directories. A group_vars file must have the same name as the group the variables are meant to be associated with. For example the group `[arista]` in the above hosts file can have a group_vars file named `arista`, `arista.yml`, or `arista.yaml`. An example can be seen in the `~/ansible-training/inventory/group_vars/arista` file.
 
 ```
 
-[arista@ansible ~]$ cat ~/ansible-training/group_vars/arista
+[arista@ansible ~]$ cat ~/ansible-training/inventory/group_vars/arista
 ansible_connection: network_cli
 ansible_network_os: eos
 ansible_user: arista
