@@ -35,7 +35,6 @@ In the previous section, you learned how to use the `eos_facts` module to collec
 The `eos_command` module allows you to do that. Go ahead and add another task to the playbook to collect the output of 2 _show_ commands to collect the **hostname** and the output of the `show ip interface brief` commands:
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -52,7 +51,7 @@ The `eos_command` module allows you to do that. Go ahead and add another task to
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
@@ -60,10 +59,9 @@ The `eos_command` module allows you to do that. Go ahead and add another task to
         commands:
           - show run | i hostname
           - show ip interface brief
-{%endraw%}
 ```
 
-> Note: **commands** is a parameter required by the **eos_module**. The input to this parameter is a "list" of EOS commands.
+> Note: **commands** is a parameter required by the **eos_command** module. The input to this parameter is a "list" of EOS commands.
 
 
 
@@ -78,7 +76,6 @@ Before running the playbook, add a `tag` to the last task. Name it "show"
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -95,7 +92,7 @@ Before running the playbook, add a `tag` to the last task. Name it "show"
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
@@ -105,7 +102,6 @@ Before running the playbook, add a `tag` to the last task. Name it "show"
           - show ip interface brief
       tags: show
 
-{%endraw%}
 ```
 
 
@@ -118,17 +114,25 @@ Selectively run the last task within the playbook using the `--tags` option:
 
 PLAY [GATHER INFORMATION FROM SWITCHES] **************************************************************************
 
-TASK [COLLECT OUTPUT OF SHOW COMMANDS] **************************************************************************
-ok: [rtr2]
-ok: [rtr3]
-ok: [rtr1]
-ok: [rtr4]
+TASK [COLLECT OUTPUT OF SHOW COMMANDS] ************************************************************************************************
+ok: [leaf1]
+ok: [leaf3]
+ok: [spine2]
+ok: [leaf2]
+ok: [spine1]
+ok: [leaf4]
+ok: [host2]
+ok: [host1]
 
-PLAY RECAP ******************************************************************************************************
-rtr1                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=0    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=3    changed=0    unreachable=0    failed=0
+host2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf1                      : ok=3    changed=0    unreachable=0    failed=0
+leaf2                      : ok=3    changed=0    unreachable=0    failed=0
+leaf3                      : ok=3    changed=0    unreachable=0    failed=0
+leaf4                      : ok=3    changed=0    unreachable=0    failed=0
+spine1                     : ok=3    changed=0    unreachable=0    failed=0
+spine2                     : ok=3    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -136,7 +140,7 @@ rtr4                       : ok=1    changed=0    unreachable=0    failed=0
 
 Note 2 important points here.
 
-1. Only a single task was executed during the playbook run (You no longer can see the hostname and EOS version being displayed)
+1. Only a single task was executed during the playbook run (You no longer see the hostname and EOS version being displayed)
 
 2. The output of the show commands is not being displayed.
 
@@ -156,7 +160,6 @@ With the `eos_facts` module, the output was automatically assigned to the `ansib
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -173,7 +176,7 @@ With the `eos_facts` module, the output was automatically assigned to the `ansib
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
       eos_command:
@@ -182,7 +185,6 @@ With the `eos_facts` module, the output was automatically assigned to the `ansib
           - show ip interface brief
       tags: show
       register: show_output
-{%endraw%}
 
 ```
 
@@ -194,7 +196,6 @@ Add a task to use the `debug` module to display the content's of the `show_outpu
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -211,7 +212,7 @@ Add a task to use the `debug` module to display the content's of the `show_outpu
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
       eos_command:
@@ -225,7 +226,6 @@ Add a task to use the `debug` module to display the content's of the `show_outpu
       debug:
         var: show_output
       tags: show
-{%endraw%}
 ```
 
 > Note the use of **var** vs **msg** for the debug module.
@@ -235,47 +235,37 @@ Add a task to use the `debug` module to display the content's of the `show_outpu
 
 #### Step 8
 
-Re-run the playbook to execute only the tasks that have been tagged. This time run the playbook without the `-v` flag.
+Re-run the playbook to execute only the tasks that have been tagged. This time run the playbook without the `-v` flag and lets `--limit` the output to only `spine1`.
 
 
 ```
-[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts gather_eos_data.yml --tags=show
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts gather_eos_data.yml --tags=show --limit=spine1
 
 PLAY [GATHER INFORMATION FROM SWITCHES] **************************************************************************
 
 TASK [COLLECT OUTPUT OF SHOW COMMANDS] **************************************************************************
-ok: [rtr4]
-ok: [rtr1]
-ok: [rtr3]
-ok: [rtr2]
+ok: [spine1]
 
 TASK [DISPLAY THE COMMAND OUTPUT] *******************************************************************************
-ok: [rtr4] => {
+ok: [spine1] => {
     "show_output": {
         "changed": false,
         "failed": false,
         "stdout": [
-            "hostname rtr4",
-            "Interface              IP-Address      OK? Method Status                Protocol\nGigabitEthernet1       172.17.231.181  YES DHCP   up                    up      \nLoopback0              192.168.4.104   YES manual up                    up      \nLoopback1              10.4.4.104      YES manual up                    up      \nTunnel0                10.101.101.4    YES manual up                    up      \nVirtualPortGroup0      192.168.35.101  YES TFTP   up                    up"
+            "hostname spine1",
+            "Interface              IP Address         Status     Protocol         MTU\nManagement1            192.168.0.10/24    down       notpresent      1500"
         ],
         "stdout_lines": [
             [
-                "hostname rtr4"
+                "hostname spine1"
             ],
             [
-                "Interface              IP-Address      OK? Method Status                Protocol",
-                "GigabitEthernet1       172.17.231.181  YES DHCP   up                    up      ",
-                "Loopback0              192.168.4.104   YES manual up                    up      ",
-                "Loopback1              10.4.4.104      YES manual up                    up      ",
-                "Tunnel0                10.101.101.4    YES manual up                    up      ",
-                "VirtualPortGroup0      192.168.35.101  YES TFTP   up                    up"
+                "Interface              IP Address         Status     Protocol         MTU",
+                "Management1            192.168.0.10/24    down       notpresent      1500"
             ]
         ]
     }
 }
-ok: [rtr1] => {
-    "show_output": {
-        "changed": false,
 .
 .
 .
@@ -292,7 +282,6 @@ Write a new task to display only the hostname using a debug command:
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GATHER INFORMATION FROM SWITCHES
   hosts: arista
@@ -309,7 +298,7 @@ Write a new task to display only the hostname using a debug command:
 
     - name: DISPLAY HOSTNAME
       debug:
-        msg: "The hostname is:{{ ansible_net_hostname }}"
+        msg: "The hostname is: {{ ansible_net_hostname }}"
 
     - name: COLLECT OUTPUT OF SHOW COMMANDS
       eos_command:
@@ -328,59 +317,73 @@ Write a new task to display only the hostname using a debug command:
       debug:
         msg: "The hostname is {{ show_output.stdout[0] }}"
       tags: show
-{%endraw%}
 ```
 
 #### Step 10
 
-Re-run the playbook.
+Re-run the playbook, but add leaf1.
 
 
-``` yaml
-[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts gather_eos_data.yml --tags=show
+```
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts gather_eos_data.yml --tags=show --limit=spine1,leaf1
 
-PLAY [GATHER INFORMATION FROM SWITCHES] **************************************************************************
+PLAY [GATHER INFORMATION FROM SWITCHES] ***********************************************************************************************
 
-TASK [COLLECT OUTPUT OF SHOW COMMANDS] **************************************************************************
-ok: [rtr2]
-ok: [rtr4]
-ok: [rtr1]
-ok: [rtr3]
+TASK [COLLECT OUTPUT OF SHOW COMMANDS] ************************************************************************************************
+ok: [leaf1]
+ok: [spine1]
 
-TASK [DISPLAY THE COMMAND OUTPUT] *******************************************************************************
-ok: [rtr2] => {
+TASK [DISPLAY THE COMMAND OUTPUT] *****************************************************************************************************
+ok: [leaf1] => {
     "show_output": {
         "changed": false,
         "failed": false,
         "stdout": [
-.
-.
-.
-.
-.
-<output omitted for brevity>
-.
-.
-.
-TASK [DISPLAY THE HOSTNAME] *************************************************************************************
-ok: [rtr2] => {
-    "msg": "The hostname is hostname rtr2"
+            "hostname leaf1",
+            "Interface              IP Address         Status     Protocol         MTU\nManagement1            192.168.0.14/24    down       notpresent      1500"
+        ],
+        "stdout_lines": [
+            [
+                "hostname leaf1"
+            ],
+            [
+                "Interface              IP Address         Status     Protocol         MTU",
+                "Management1            192.168.0.14/24    down       notpresent      1500"
+            ]
+        ]
+    }
 }
-ok: [rtr1] => {
-    "msg": "The hostname is hostname rtr1"
-}
-ok: [rtr3] => {
-    "msg": "The hostname is hostname rtr3"
-}
-ok: [rtr4] => {
-    "msg": "The hostname is hostname rtr4"
+ok: [spine1] => {
+    "show_output": {
+        "changed": false,
+        "failed": false,
+        "stdout": [
+            "hostname spine1",
+            "Interface              IP Address         Status     Protocol         MTU\nManagement1            192.168.0.10/24    down       notpresent      1500"
+        ],
+        "stdout_lines": [
+            [
+                "hostname spine1"
+            ],
+            [
+                "Interface              IP Address         Status     Protocol         MTU",
+                "Management1            192.168.0.10/24    down       notpresent      1500"
+            ]
+        ]
+    }
 }
 
-PLAY RECAP ******************************************************************************************************
-rtr1                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=3    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=3    changed=0    unreachable=0    failed=0   
+TASK [DISPLAY THE HOSTNAME AGAIN] *****************************************************************************************************
+ok: [leaf1] => {
+    "msg": "The hostname is hostname leaf1"
+}
+ok: [spine1] => {
+    "msg": "The hostname is hostname spine1"
+}
+
+PLAY RECAP ****************************************************************************************************************************
+leaf1                      : ok=3    changed=0    unreachable=0    failed=0
+spine1                     : ok=3    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
