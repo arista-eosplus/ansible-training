@@ -36,8 +36,8 @@ Add a task to ensure that the SNMP strings `ansible-public` and `ansible-private
     - name: ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT
       eos_config:
         commands:
-          - snmp-server community ansible-public RO
-          - snmp-server community ansible-private RW
+          - snmp-server community ansible-public ro
+          - snmp-server community ansible-private rw
 
 ```
 
@@ -45,22 +45,30 @@ Add a task to ensure that the SNMP strings `ansible-public` and `ansible-private
 
 Run the playbook:
 
-``` shell
+```
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_configs.yml
 
-PLAY [UPDATE THE SNMP RO/RW STRINGS] ********************************************************************
+PLAY [SNMP RO/RW STRING CONFIGURATION] ************************************************************************************************
 
-TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *************************************************
-changed: [rtr4]
-changed: [rtr1]
-changed: [rtr3]
-changed: [rtr2]
+TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *******************************************************************************
+changed: [spine2]
+changed: [leaf1]
+changed: [spine1]
+changed: [leaf3]
+changed: [leaf2]
+changed: [leaf4]
+changed: [host1]
+changed: [host2]
 
-PLAY RECAP **********************************************************************************************
-rtr1                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=1    changed=1    unreachable=0    failed=0
+host2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf1                      : ok=1    changed=1    unreachable=0    failed=0
+leaf2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf3                      : ok=1    changed=1    unreachable=0    failed=0
+leaf4                      : ok=1    changed=1    unreachable=0    failed=0
+spine1                     : ok=1    changed=1    unreachable=0    failed=0
+spine2                     : ok=1    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -74,22 +82,30 @@ Feel free to log in and check the configuration update.
 The `eos_config` module is idempotent. This means, a configuration change is  pushed to the device if and only if that configuration does not exist on the end hosts. To validate this, go ahead and re-run the playbook:
 
 
-``` shell
+```
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_configs.yml  
 
-PLAY [UPDATE THE SNMP RO/RW STRINGS] ********************************************************************************************************************************************************
+PLAY [SNMP RO/RW STRING CONFIGURATION] ************************************************************************************************
 
-TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *************************************************************************************************************************************
-ok: [rtr1]
-ok: [rtr2]
-ok: [rtr4]
-ok: [rtr3]
+TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *******************************************************************************
+ok: [leaf3]
+ok: [spine1]
+ok: [leaf2]
+ok: [spine2]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=0    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=0    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=1    changed=0    unreachable=0    failed=0
+host2                      : ok=1    changed=0    unreachable=0    failed=0
+leaf1                      : ok=1    changed=0    unreachable=0    failed=0
+leaf2                      : ok=1    changed=0    unreachable=0    failed=0
+leaf3                      : ok=1    changed=0    unreachable=0    failed=0
+leaf4                      : ok=1    changed=0    unreachable=0    failed=0
+spine1                     : ok=1    changed=0    unreachable=0    failed=0
+spine2                     : ok=1    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -117,9 +133,9 @@ Now update the task to add one more SNMP RO community string:
     - name: ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT
       eos_config:
         commands:
-          - snmp-server community ansible-public RO
-          - snmp-server community ansible-private RW
-          - snmp-server community ansible-test RO
+          - snmp-server community ansible-public ro
+          - snmp-server community ansible-private rw
+          - snmp-server community ansible-test ro
 
 ```
 
@@ -130,23 +146,31 @@ Now update the task to add one more SNMP RO community string:
 This time however, instead of running the playbook to push the change to the device, execute it using the `--check` flag in combination with the `-v` or verbose mode flag:
 
 
-``` shell
+```
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_configs.yml  --check -v
 Using /home/arista/ansible-training/ansible.cfg as config file
 
-PLAY [UPDATE THE SNMP RO/RW STRINGS] ********************************************************************************************************************************************************
+PLAY [SNMP RO/RW STRING CONFIGURATION] ************************************************************************************************
 
-TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *************************************************************************************************************************************
-changed: [rtr3] => {"banners": {}, "changed": true, "commands": ["snmp-server community ansible-test RO"], "updates": ["snmp-server community ansible-test RO"]}
-changed: [rtr1] => {"banners": {}, "changed": true, "commands": ["snmp-server community ansible-test RO"], "updates": ["snmp-server community ansible-test RO"]}
-changed: [rtr2] => {"banners": {}, "changed": true, "commands": ["snmp-server community ansible-test RO"], "updates": ["snmp-server community ansible-test RO"]}
-changed: [rtr4] => {"banners": {}, "changed": true, "commands": ["snmp-server community ansible-test RO"], "updates": ["snmp-server community ansible-test RO"]}
+TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *******************************************************************************
+changed: [spine1] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398023", "updates": ["snmp-server community ansible-test ro"]}
+changed: [leaf1] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398023", "updates": ["snmp-server community ansible-test ro"]}
+changed: [leaf3] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398023", "updates": ["snmp-server community ansible-test ro"]}
+changed: [leaf2] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398023", "updates": ["snmp-server community ansible-test ro"]}
+changed: [spine2] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398023", "updates": ["snmp-server community ansible-test ro"]}
+changed: [leaf4] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398027", "updates": ["snmp-server community ansible-test ro"]}
+changed: [host1] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398027", "updates": ["snmp-server community ansible-test ro"]}
+changed: [host2] => {"changed": true, "commands": ["snmp-server community ansible-test ro"], "session": "ansible_1549398027", "updates": ["snmp-server community ansible-test ro"]}
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=1    changed=1    unreachable=0    failed=0
+host2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf1                      : ok=1    changed=1    unreachable=0    failed=0
+leaf2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf3                      : ok=1    changed=1    unreachable=0    failed=0
+leaf4                      : ok=1    changed=1    unreachable=0    failed=0
+spine1                     : ok=1    changed=1    unreachable=0    failed=0
+spine2                     : ok=1    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -164,22 +188,30 @@ Also note that even though 3 commands are being sent to the device as part of th
 
 Finally re-run this playbook again without the `-v` or `--check` flag to push the changes.
 
-``` shell
+```
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_configs.yml  
 
-PLAY [UPDATE THE SNMP RO/RW STRINGS] ********************************************************************************************************************************************************
+PLAY [SNMP RO/RW STRING CONFIGURATION] ************************************************************************************************
 
-TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *************************************************************************************************************************************
-changed: [rtr1]
-changed: [rtr2]
-changed: [rtr4]
-changed: [rtr3]
+TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *******************************************************************************
+changed: [spine1]
+changed: [leaf3]
+changed: [leaf1]
+changed: [spine2]
+changed: [leaf2]
+changed: [host1]
+changed: [leaf4]
+changed: [host2]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=1    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=1    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=1    changed=1    unreachable=0    failed=0
+host2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf1                      : ok=1    changed=1    unreachable=0    failed=0
+leaf2                      : ok=1    changed=1    unreachable=0    failed=0
+leaf3                      : ok=1    changed=1    unreachable=0    failed=0
+leaf4                      : ok=1    changed=1    unreachable=0    failed=0
+spine1                     : ok=1    changed=1    unreachable=0    failed=0
+spine2                     : ok=1    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 ```
@@ -187,26 +219,22 @@ rtr4                       : ok=1    changed=1    unreachable=0    failed=0
 
 #### Step 8
 
-Rather than push individual lines of configuration, an entire configuration snippet can be pushed to the devices. Create a file called `secure_switch.cfg` in the same directory as your playbook and add the following lines of configuration into it:
+Rather than push individual lines of configuration, an entire configuration snippet can be pushed to the devices. Create a file called `general_switch.cfg` in the same directory as your playbook and add the following lines of configuration into it:
 
-``` shell
-line con 0
- exec-timeout 5 0
-line vty 0 4
- exec-timeout 5 0
- transport input ssh
-ip ssh time-out 60
-ip ssh authentication-retries 5
-service password-encryption
-service tcp-keepalives-in
-service tcp-keepalives-out
+```
+ip domain-name ansible.test
+
+logging host 192.168.0.200
+
+ntp server ansible-nettime prefer
+ntp server 192.168.0.100
 
 ```
 
 
 #### Step 9
 
-Remember that a playbook contains a list of plays. Add a new play called `HARDEN EOS SWITCHES` to the `switch_configs.yml` playbook.
+Remember that a playbook contains a list of plays. Add a new play called `GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES` to the `switch_configs.yml` playbook.
 
 ``` yaml
 
@@ -226,7 +254,7 @@ Remember that a playbook contains a list of plays. Add a new play called `HARDEN
           - snmp-server community ansible-test RO
 
 
-- name: HARDEN EOS SWITCHES
+- name: GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES
   hosts: arista
   gather_facts: no
   connection: network_cli
@@ -237,7 +265,7 @@ Remember that a playbook contains a list of plays. Add a new play called `HARDEN
 
 #### Step 10
 
-Add a task to this new play to push the configurations in the `secure_switch.cfg` file you created in **STEP 8**
+Add a task to this new play to push the configurations in the `general_switch.cfg` file you created in **STEP 8**
 
 
 ``` yaml
@@ -257,16 +285,16 @@ Add a task to this new play to push the configurations in the `secure_switch.cfg
           - snmp-server community ansible-test RO
 
 
-- name: HARDEN EOS SWITCHES
+- name: GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES
   hosts: arista
   gather_facts: no
   connection: network_cli
 
   tasks:
 
-    - name: ENSURE THAT SWITCHES ARE SECURE
+    - name: PUSH GENERAL SWITCH CONFIGS
       eos_config:
-        src: secure_switch.cfg
+        src: general_switch.cfg
 ```
 
 
@@ -274,30 +302,42 @@ Add a task to this new play to push the configurations in the `secure_switch.cfg
 
 Go ahead and run the playbook.
 
-``` shell
+```
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_configs.yml  
 
-PLAY [UPDATE THE SNMP RO/RW STRINGS] ********************************************************************************************************************************************************
+PLAY [SNMP RO/RW STRING CONFIGURATION] ************************************************************************************************
 
-TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *************************************************************************************************************************************
-ok: [rtr3]
-ok: [rtr2]
-ok: [rtr1]
-ok: [rtr4]
+TASK [ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT] *******************************************************************************
+ok: [spine2]
+ok: [leaf3]
+ok: [spine1]
+ok: [leaf2]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-PLAY [HARDEN EOS SWITCHES] *******************************************************************************************************************************************************************
+PLAY [GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES] ***********************************************************************************
 
-TASK [ENSURE THAT SWITCHES ARE SECURE] *******************************************************************************************************************************************************
-changed: [rtr4]
-changed: [rtr3]
-changed: [rtr2]
-changed: [rtr1]
+TASK [PUSH GENERAL SWITCH CONFIGS] ****************************************************************************************************
+changed: [spine1]
+changed: [spine2]
+changed: [leaf1]
+changed: [leaf3]
+changed: [leaf2]
+changed: [leaf4]
+changed: [host1]
+changed: [host2]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=2    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=2    changed=1    unreachable=0    failed=0
+host2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf1                      : ok=2    changed=1    unreachable=0    failed=0
+leaf2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf3                      : ok=2    changed=1    unreachable=0    failed=0
+leaf4                      : ok=2    changed=1    unreachable=0    failed=0
+spine1                     : ok=2    changed=1    unreachable=0    failed=0
+spine2                     : ok=2    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 

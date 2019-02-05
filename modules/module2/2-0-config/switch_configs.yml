@@ -9,12 +9,12 @@
     - name: ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT
       eos_config:
         commands:
-          - snmp-server community ansible-public RO
-          - snmp-server community ansible-private RW
-          - snmp-server community ansible-test RO
+          - snmp-server community ansible-public ro
+          - snmp-server community ansible-private rw
+          - snmp-server community ansible-test ro
 
 
-- name: HARDEN EOS ROUTERS
+- name: GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES
   hosts: arista
   gather_facts: no
   connection: network_cli
@@ -23,4 +23,4 @@
 
     - name: ENSURE THAT SWITHES ARE SECURE
       eos_config:
-        src: secure_switch.cfg
+        src: general_switch.cfg
