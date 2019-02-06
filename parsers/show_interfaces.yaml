@@ -3,7 +3,7 @@
   parser_metadata:
     version: 1.0
     command: show interface
-    network_os: ios
+    network_os: eos
 
 - name: match sections
   pattern_match:

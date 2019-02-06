@@ -170,7 +170,6 @@ Feel free to view the contents of the parser file. You will notice how it uses r
 Add a new task to view the contents being returned by the `command_parser`
 
 ``` yaml
-{%raw%}
 ---
 - name: GENERATE INTERFACE REPORT
   hosts: arista
@@ -195,7 +194,6 @@ Add a new task to view the contents being returned by the `command_parser`
     - name: DISPLAY THE PARSED DATA
       debug:
         var: interface_facts
-{%endraw%}
 ```
 
 
@@ -205,7 +203,7 @@ Go ahead and run this playbook. Since our objective is to simply view the return
 
 
 ``` shell
-[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts interface_report.yml --limit rtr1
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts interface_report.yml --limit spine1
 
 PLAY [GENERATE INTERFACE REPORT] ************************************************************************************************************************************************************
 
@@ -280,6 +278,12 @@ ok: [rtr1] => {
         }
     ]
 }
+.
+.
+.
+.
+.
+<output omitted for brevity>
 
 PLAY RECAP **********************************************************************************************************************************************************************************
 rtr1                       : ok=3    changed=0    unreachable=0    failed=0   

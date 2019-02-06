@@ -3,7 +3,7 @@
   parser_metadata:
     version: 1.0
     command: show ip interface brief
-    network_os: ios
+    network_os: eos
 
 - name: MATCH PATTERN
   pattern_match:
