@@ -10,43 +10,34 @@ The Ansible [network-engine](https://github.com/ansible-network/network-engine) 
 Here is how the output of a `show interfaces` command looks like on a Arista EOS device:
 
 ``` shell
-rtr2#show interfaces
-GigabitEthernet1 is up, line protocol is up
-  Hardware is CSR vNIC, address is 0e56.1bf5.5ee2 (bia 0e56.1bf5.5ee2)
-  Internet address is 172.17.16.140/16
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
-     reliability 255/255, txload 1/255, rxload 1/255
-  Encapsulation ARPA, loopback not set
-  Keepalive set (10 sec)
-  Full Duplex, 1000Mbps, link type is auto, media type is Virtual
-  output flow-control is unsupported, input flow-control is unsupported
-  ARP type: ARPA, ARP Timeout 04:00:00
-  Last input 00:00:00, output 00:00:00, output hang never
+spine1#show interfaces
+Ethernet1 is up, line protocol is up (connected)
+  Hardware is Ethernet, address is aeca.6e66.78e8 (bia aeca.6e66.78e8)
+  Ethernet MTU 9214 bytes
+  Full-duplex, Unconfigured, auto negotiation: off, uni-link: n/a
+  Up 1 hour, 8 minutes, 40 seconds
+  Loopback Mode : None
+  1 link status changes since last clear
   Last clearing of "show interface" counters never
-  Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 0
-  Queueing strategy: fifo
-  Output queue: 0/40 (size/max)
-  5 minute input rate 1000 bits/sec, 1 packets/sec
-  5 minute output rate 1000 bits/sec, 1 packets/sec
-     208488 packets input, 22368304 bytes, 0 no buffer
-     Received 0 broadcasts (0 IP multicasts)
-     0 runts, 0 giants, 0 throttles
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
-     0 watchdog, 0 multicast, 0 pause input
-     250975 packets output, 40333671 bytes, 0 underruns
-     0 output errors, 0 collisions, 1 interface resets
-     0 unknown protocol drops
-     0 babbles, 0 late collision, 0 deferred
-     0 lost carrier, 0 no carrier, 0 pause output
-     0 output buffer failures, 0 output buffers swapped out
-Loopback0 is up, line protocol is up
-  Hardware is Loopback
-  Internet address is 192.168.2.102/24
-  MTU 1514 bytes, BW 8000000 Kbit/sec, DLY 5000 usec,
-     reliability 255/255, txload 1/255, rxload 1/255
-  Encapsulation LOOPBACK, loopback not set
-  Keepalive set (10 sec)
-
+  5 minutes input rate 0 bps (- with framing overhead), 0 packets/sec
+  5 minutes output rate 0 bps (- with framing overhead), 0 packets/sec
+     174 packets input, 29864 bytes
+     Received 0 broadcasts, 174 multicast
+     0 runts, 0 giants
+     0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+     0 PAUSE input
+     2220 packets output, 281522 bytes
+     Sent 0 broadcasts, 2220 multicast
+     0 output errors, 0 collisions
+     0 late collision, 0 deferred, 0 output discards
+     0 PAUSE output
+Ethernet2 is up, line protocol is up (connected)
+  Hardware is Ethernet, address is 722f.201a.45b4 (bia 722f.201a.45b4)
+  Ethernet MTU 9214 bytes
+  Full-duplex, Unconfigured, auto negotiation: off, uni-link: n/a
+  Up 1 hour, 8 minutes, 40 seconds
+  Loopback Mode : None
+  1 link status changes since last clear
 .
 .
 .
@@ -56,7 +47,7 @@ Loopback0 is up, line protocol is up
 ```
 
 
-Let's say your task is to prepare a list of interfaces that are currently **up**, the MTU setting, the type and description on the interface. You could log into each device, execute the above command and collect this information. Now imagine if you had to repeat this for 150 devices in your network. That is a lot of man-hours on a relatively boring task!
+Let's say your task is to prepare a list of interfaces that are currently **up**, the MTU setting, the type and description on the interface. You could log into each device, execute the above command and collect this information. Now imagine if you had to repeat this for 150 devices in your network. That would require a lot of time on a relatively boring task!
 
 In this lab, we will learn how to automate this exact scenario using Ansible.
 
@@ -80,6 +71,11 @@ Next add the `ansible-network.network-engine` role into the playbook. Roles are 
 
 ``` bash
 [arista@ansible ansible-training]$ ansible-galaxy install ansible-network.network-engine
+- downloading role 'network-engine', owned by ansible-network
+- downloading role from https://github.com/ansible-network/network-engine/archive/v2.7.3.tar.gz
+- extracting ansible-network.network-engine to /home/arista/.ansible/roles/ansible-network.network-engine
+- ansible-network.network-engine (v2.7.3) was installed successfully
+[arista@ansible ansible-training]$
 
 ```
 
@@ -137,7 +133,6 @@ Add this to your playbook:
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GENERATE INTERFACE REPORT
   hosts: arista
@@ -159,7 +154,6 @@ Add this to your playbook:
         file: "parsers/show_interfaces.yaml"
         content: "{{ output.stdout[0] }}"
 
-{%endraw%}
 ```
 
 Let's understand this task in a little more depth. The `command_parser` is referencing a file called `show_interfaces.yaml` within the `parsers` directory. For this lab, the parser has been pre-populated for you. The parsers are written to handle the output from standard show commands on various network platforms.
