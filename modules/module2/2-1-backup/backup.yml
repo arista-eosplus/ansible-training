@@ -15,14 +15,14 @@
         src: "{{config_output.backup_path}}"
         dest: "./backup/{{inventory_hostname}}.config"
 
-    - name: REMOVE NON CONFIG LINES
+    - name: REMOVE LOGGING LINE
       lineinfile:
         path: "./backup/{{inventory_hostname}}.config"
-        line: "Building configuration..."
+        line: "logging host 192.168.0.200"
         state: absent
 
-    - name: REMOVE NON CONFIG LINES - REGEXP
+    - name: REMOVE SNMP LINES - REGEXP
       lineinfile:
         path: "./backup/{{inventory_hostname}}.config"
-        regexp: 'Current configuration.*'
+        regexp: 'snmp-server community ansible-.*'
         state: absent

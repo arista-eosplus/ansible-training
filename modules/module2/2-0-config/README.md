@@ -221,7 +221,7 @@ spine2                     : ok=1    changed=1    unreachable=0    failed=0
 
 Rather than push individual lines of configuration, an entire configuration snippet can be pushed to the devices. Create a file called `general_switch.cfg` in the same directory as your playbook and add the following lines of configuration into it:
 
-```
+``` shell
 ip domain-name ansible.test
 
 logging host 192.168.0.200
@@ -249,9 +249,9 @@ Remember that a playbook contains a list of plays. Add a new play called `GENERA
     - name: ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT
       eos_config:
         commands:
-          - snmp-server community ansible-public RO
-          - snmp-server community ansible-private RW
-          - snmp-server community ansible-test RO
+          - snmp-server community ansible-public ro
+          - snmp-server community ansible-private rw
+          - snmp-server community ansible-test ro
 
 
 - name: GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES
@@ -280,9 +280,9 @@ Add a task to this new play to push the configurations in the `general_switch.cf
     - name: ENSURE THAT THE DESIRED SNMP STRINGS ARE PRESENT
       eos_config:
         commands:
-          - snmp-server community ansible-public RO
-          - snmp-server community ansible-private RW
-          - snmp-server community ansible-test RO
+          - snmp-server community ansible-public ro
+          - snmp-server community ansible-private rw
+          - snmp-server community ansible-test ro
 
 
 - name: GENERAL ENVIRONMENT CONFIGS FOR EOS SWITCHES

@@ -207,17 +207,18 @@ Notice that the directory now has another backed-up configuration but one that r
 
 #### Step 8
 
-If we were to try and manually restore the contents of this file to the respective device there are two lines in the configuration that will raise errors:
+As an example of Ansible's ability to make modifications to the backup file when necessary we will write a new task using Ansible's `lineinfile` module to a few configurations we added in a previous module.
+
+We will remove the following lines:
 
 ``` shell
-Building configuration...
+logging host 192.168.0.200
 
-Current configuration with default configurations exposed : 393416 bytes
+snmp-server community ansible-public ro
+snmp-server community ansible-private rw
+snmp-server community ansible-test ro
 
 ```
-These lines have to be "cleaned up" to have a restorable configuration.
-
-Write a new task using Ansible's `lineinfile` module to remove the first line.
 
 
 ``` yaml
@@ -238,20 +239,20 @@ Write a new task using Ansible's `lineinfile` module to remove the first line.
         src: "{{config_output.backup_path}}"
         dest: "./backup/{{inventory_hostname}}.config"
 
-    - name: REMOVE NON CONFIG LINES
+    - name: REMOVE LOGGING LINE
       lineinfile:
         path: "./backup/{{inventory_hostname}}.config"
-        line: "Building configuration..."
+        line: "logging host 192.168.0.200"
         state: absent
 ```
 
 
-> Note: The module parameter **line** is matching an exact line in the configuration file "Building configuration..."
+> Note: The module parameter **line** is matching an exact line in the configuration file "logging host 192.168.0.200"
 
 
 #### Step 9
 
-Before we run the playbook, we need to add one more task to remove the second line "Current configuration ...etc". Since this line has a variable entity (the number of bytes), we cannot use the `line` parameter of the `lineinfile` module. Instead, we'll use the `regexp` parameter to match on regular expressions and remove the line in the file:
+Before we run the playbook, we need to add one more task to remove the second set of "snmp-server community ..." commands. Since these lines are similar we can group them using the `regexp` parameter to match on regular expressions and remove the lines in the file instead of having to remove each individually using the `line` parameter.
 
 
 ``` yaml
@@ -272,19 +273,50 @@ Before we run the playbook, we need to add one more task to remove the second li
         src: "{{config_output.backup_path}}"
         dest: "./backup/{{inventory_hostname}}.config"
 
-    - name: REMOVE NON CONFIG LINES
+    - name: REMOVE LOGGING LINE
       lineinfile:
         path: "./backup/{{inventory_hostname}}.config"
-        line: "Building configuration..."
+        line: "logging host 192.168.0.200"
         state: absent
 
-    - name: REMOVE NON CONFIG LINES - REGEXP
+    - name: REMOVE SNMP LINES - REGEXP
       lineinfile:
         path: "./backup/{{inventory_hostname}}.config"
-        regexp: 'Current configuration.*'
+        regexp: 'snmp-server community ansible-.*'
         state: absent
 ```
 
+
+Take a quick look at the config files before running the updated playbook to verify the config lines are currently present.
+
+
+``` shell
+[arista@ansible ansible-training]$ head -n 20 backup/spine1.config
+! Command: show running-config
+! device: spine1 (vEOS, EOS-4.21.2F)
+!
+daemon TerminAttr
+   ...
+   no shutdown
+!
+transceiver qsfp default-mode 4x10G
+!
+logging host 192.168.0.200
+!
+hostname spine1
+ip domain-name ansible.test
+!
+ntp server 192.168.0.100
+ntp server ansible-nettime prefer
+!
+snmp-server community ansible-private rw
+snmp-server community ansible-public ro
+snmp-server community ansible-test ro
+[arista@ansible ansible-training]$
+
+```
+
+> Note: The **head** unix command will display the first N lines specified as an argument.
 
 #### Step 10
 
@@ -294,37 +326,57 @@ Now run the playbook.
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts backup.yml
 
-PLAY [BACKUP SWITCH CONFIGURATIONS] *********************************************************************************************************************************************************
+PLAY [BACKUP SWITCH CONFIGURATIONS] ***************************************************************************************************
 
-TASK [BACKUP THE CONFIG] ********************************************************************************************************************************************************************
-ok: [rtr2]
-ok: [rtr4]
-ok: [rtr1]
-ok: [rtr3]
+TASK [BACKUP THE CONFIG] **************************************************************************************************************
+ok: [spine2]
+ok: [leaf2]
+ok: [spine1]
+ok: [leaf3]
+ok: [leaf1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-TASK [RENAME BACKUP] ************************************************************************************************************************************************************************
-changed: [rtr2]
-changed: [rtr4]
-changed: [rtr3]
-changed: [rtr1]
+TASK [RENAME BACKUP] ******************************************************************************************************************
+changed: [spine2]
+changed: [leaf1]
+changed: [leaf3]
+changed: [spine1]
+changed: [leaf2]
+changed: [host2]
+changed: [host1]
+changed: [leaf4]
 
-TASK [REMOVE NON CONFIG LINES] **************************************************************************************************************************************************************
-changed: [rtr4]
-changed: [rtr1]
-changed: [rtr2]
-changed: [rtr3]
+TASK [REMOVE LOGGING LINE] ************************************************************************************************************
+changed: [leaf1]
+changed: [leaf2]
+changed: [spine1]
+changed: [leaf3]
+changed: [spine2]
+changed: [host1]
+changed: [host2]
+changed: [leaf4]
 
-TASK [REMOVE NON CONFIG LINES - REGEXP] *****************************************************************************************************************************************************
-changed: [rtr1]
-changed: [rtr3]
-changed: [rtr2]
-changed: [rtr4]
+TASK [REMOVE SNMP LINES - REGEXP] *****************************************************************************************************
+changed: [spine1]
+changed: [leaf1]
+changed: [leaf2]
+changed: [spine2]
+changed: [leaf3]
+changed: [leaf4]
+changed: [host1]
+changed: [host2]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=4    changed=3    unreachable=0    failed=0   
-rtr2                       : ok=4    changed=3    unreachable=0    failed=0   
-rtr3                       : ok=4    changed=3    unreachable=0    failed=0   
-rtr4                       : ok=4    changed=3    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=4    changed=3    unreachable=0    failed=0
+host2                      : ok=4    changed=3    unreachable=0    failed=0
+leaf1                      : ok=4    changed=3    unreachable=0    failed=0
+leaf2                      : ok=4    changed=3    unreachable=0    failed=0
+leaf3                      : ok=4    changed=3    unreachable=0    failed=0
+leaf4                      : ok=4    changed=3    unreachable=0    failed=0
+spine1                     : ok=4    changed=3    unreachable=0    failed=0
+spine2                     : ok=4    changed=3    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -333,25 +385,34 @@ rtr4                       : ok=4    changed=3    unreachable=0    failed=0
 
 #### Step 11
 
-Use an editor to view the cleaned up files. The first 2 lines that we cleaned up in the earlier tasks should be absent:
+Use an editor to view the updated config files. The logging and snmp-server lines should be absent:
 
 ``` shell
-[arista@ansible ansible-training]$ head -n 10 backup/rtr1.config
-
+[arista@ansible ansible-training]$ head -n 20 backup/spine1.config
+! Command: show running-config
+! device: spine1 (vEOS, EOS-4.21.2F)
 !
-! Last configuration change at 14:25:42 UTC Tue Jun 19 2018 by arista
+daemon TerminAttr
+   ...
+   no shutdown
 !
-version 16.8
-downward-compatible-config 16.8
-no service log backtrace
-no service config
-no service exec-callback
-no service nagle
+transceiver qsfp default-mode 4x10G
+!
+!
+hostname spine1
+ip domain-name ansible.test
+!
+ntp server 192.168.0.100
+ntp server ansible-nettime prefer
+!
+!
+spanning-tree mode mstp
+!
+tacacs-server key ...
 [arista@ansible ansible-training]$
 
 ```
 
-> Note: The **head** unix command will display the first N lines specified as an argument.
 
 # Complete
 
