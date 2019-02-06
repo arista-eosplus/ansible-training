@@ -5,10 +5,15 @@
   gather_facts: no
 
   tasks:
+    - name: GATHER SWITCH FACTS
+      eos_facts:
+
     - name: COPY RUNNING CONFIG TO SWITCH
-      command: scp ./backup/{{inventory_hostname}}.config {{inventory_hostname}}:/{{inventory_hostname}}.config
+      command: scp ./backup/{{inventory_hostname}}.config  arista@{{ansible_net_interfaces.Management1.ipv4.address}}:/mnt/flash/{{inventory_hostname}}.config
+      when: "'hosts' not in group_names"
 
     - name: CONFIG REPLACE
       eos_command:
         commands:
           - config replace flash:{{inventory_hostname}}.config force
+      when: "'hosts' not in group_names"
