@@ -116,28 +116,40 @@ With this in place, go ahead and run the playbook:
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_report.yml
 
-PLAY [GENERATE OS REPORT FROM SWITCHES] ******************************************************************************************************************************************************
+PLAY [GENERATE MODEL/VERSION REPORT FROM SWITCHES] ************************************************************************************
 
-TASK [GATHER SWITCH FACTS] ******************************************************************************************************************************************************************
-ok: [rtr4]
-ok: [rtr3]
-ok: [rtr2]
-ok: [rtr1]
+TASK [GATHER SWITCH FACTS] ************************************************************************************************************
+ok: [spine2]
+ok: [leaf2]
+ok: [leaf3]
+ok: [leaf1]
+ok: [spine1]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-TASK [ENSURE REPORTS FOLDER] ********************************************************************************
-changed: [rtr1]
+TASK [ENSURE REPORTS FOLDER] **********************************************************************************************************
+changed: [spine1]
 
-TASK [RENDER FACTS AS A REPORT] *************************************************************************************************************************************************************
-changed: [rtr4]
-changed: [rtr2]
-changed: [rtr3]
-changed: [rtr1]
+TASK [RENDER FACTS AS A REPORT] *******************************************************************************************************
+changed: [spine1]
+changed: [leaf1]
+changed: [leaf2]
+changed: [spine2]
+changed: [leaf3]
+changed: [host2]
+changed: [host1]
+changed: [leaf4]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=2    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=2    changed=1    unreachable=0    failed=0
+host2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf1                      : ok=2    changed=1    unreachable=0    failed=0
+leaf2                      : ok=2    changed=1    unreachable=0    failed=0
+leaf3                      : ok=2    changed=1    unreachable=0    failed=0
+leaf4                      : ok=2    changed=1    unreachable=0    failed=0
+spine1                     : ok=3    changed=2    unreachable=0    failed=0
+spine2                     : ok=2    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -150,25 +162,30 @@ After the playbook run, you should see the following files appear in the reports
 
 
 ``` shell
-reports/
-├── rtr1.md
-├── rtr2.md
-├── rtr3.md
-└── rtr4.md
-
-0 directories, 4 files
+[arista@ansible ansible-training]$ ls -l reports
+total 32
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 host1.md
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 host2.md
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 leaf1.md
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 leaf2.md
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 leaf3.md
+-rw-rw-r-- 1 arista arista 82 Feb  6 14:33 leaf4.md
+-rw-rw-r-- 1 arista arista 84 Feb  6 14:33 spine1.md
+-rw-rw-r-- 1 arista arista 84 Feb  6 14:33 spine2.md
+[arista@ansible ansible-training]$
 
 ```
 
 The contents of one of them for example:
 
 ``` shell
-[arista@ansible ansible-training]$ cat reports/rtr4.md
-
-
-RTR4
+[arista@ansible ansible-training]$ cat reports/spine1.md
+SPINE1
 ---
-9TCM27U9TQG : 16.08.01a
+hostname: spine1
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.10
 
 [arista@ansible ansible-training]$
 ```
@@ -226,31 +243,43 @@ Go ahead and run the playbook.
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts switch_report.yml
 
-PLAY [GENERATE OS REPORT FROM SWITCHES] **********************************************************************
+PLAY [GENERATE MODEL/VERSION REPORT FROM SWITCHES] ************************************************************************************
 
-TASK [GATHER SWITCH FACTS] **********************************************************************************
-ok: [rtr4]
-ok: [rtr3]
-ok: [rtr1]
-ok: [rtr2]
+TASK [GATHER SWITCH FACTS] ************************************************************************************************************
+ok: [spine1]
+ok: [leaf2]
+ok: [leaf1]
+ok: [spine2]
+ok: [leaf3]
+ok: [leaf4]
+ok: [host2]
+ok: [host1]
 
-TASK [ENSURE REPORTS FOLDER] ********************************************************************************
-changed: [rtr1]
+TASK [ENSURE REPORTS FOLDER] **********************************************************************************************************
+ok: [spine1]
 
-TASK [RENDER FACTS AS A REPORT] *****************************************************************************
-changed: [rtr2]
-changed: [rtr1]
-changed: [rtr4]
-changed: [rtr3]
+TASK [RENDER FACTS AS A REPORT] *******************************************************************************************************
+ok: [leaf1]
+ok: [spine2]
+ok: [leaf2]
+ok: [spine1]
+ok: [leaf3]
+ok: [leaf4]
+ok: [host1]
+ok: [host2]
 
-TASK [CONSOLIDATE THE EOS DATA] *****************************************************************************
-changed: [rtr1 -> localhost]
+TASK [CONSOLIDATE THE EOS DATA] *******************************************************************************************************
+changed: [spine1 -> localhost]
 
-PLAY RECAP **************************************************************************************************
-rtr1                       : ok=4    changed=3    unreachable=0    failed=0   
-rtr2                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=2    changed=1    unreachable=0    failed=0   
-rtr4                       : ok=2    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=2    changed=0    unreachable=0    failed=0
+host2                      : ok=2    changed=0    unreachable=0    failed=0
+leaf1                      : ok=2    changed=0    unreachable=0    failed=0
+leaf2                      : ok=2    changed=0    unreachable=0    failed=0
+leaf3                      : ok=2    changed=0    unreachable=0    failed=0
+leaf4                      : ok=2    changed=0    unreachable=0    failed=0
+spine1                     : ok=4    changed=1    unreachable=0    failed=0
+spine2                     : ok=2    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -265,29 +294,61 @@ A new file called `switches_info_report.md` will now be available in the playboo
 
 ``` shell
 [arista@ansible ansible-training]$ cat switches_info_report.md
-
-
-RTR1
+HOST1
 ---
-9YJXS2VD3Q7 : 16.08.01a
+hostname: host1
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.31
 
-
-
-RTR2
+HOST2
 ---
-9QHUCH0VZI9 : 16.08.01a
+hostname: host2
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.32
 
-
-
-RTR3
+LEAF1
 ---
-9ZGJ5B1DL14 : 16.08.01a
+hostname: leaf1
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.14
 
-
-
-RTR4
+LEAF2
 ---
-9TCM27U9TQG : 16.08.01a
+hostname: leaf2
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.15
+
+LEAF3
+---
+hostname: leaf3
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.16
+
+LEAF4
+---
+hostname: leaf4
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.17
+
+SPINE1
+---
+hostname: spine1
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.10
+
+SPINE2
+---
+hostname: spine2
+version: 4.21.2F
+model: vEOS
+managementIP: 192.168.0.11
 
 [arista@ansible ansible-training]$
 
@@ -295,7 +356,7 @@ RTR4
 
 > Note: Markdown files can be rendered visually as HTML
 
-At this point, with 3 small tasks, you have an OS report on all the EOS devices in your network. This is a simple example but the principle remains as you expand upon the capabilities.  For example, you can build status reports and dashboards that rely on the output of device show commands.
+At this point, with 3 small tasks, you have a report on all the EOS devices in your network. This is a simple example but the principle remains as you expand upon the capabilities.  For example, you can build status reports and dashboards that rely on the output of device show commands.
 
 Ansible provides the tools and methods to extend network automation beyond configuration management to more robust capabilities, such as, generating documentation and or reports.
 
