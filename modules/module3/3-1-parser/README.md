@@ -205,88 +205,68 @@ Go ahead and run this playbook. Since our objective is to simply view the return
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts interface_report.yml --limit spine1
 
-PLAY [GENERATE INTERFACE REPORT] ************************************************************************************************************************************************************
+PLAY [GENERATE INTERFACE REPORT] ******************************************************************************************************
 
-TASK [CAPTURE SHOW INTERFACES] **************************************************************************************************************************************************************
-ok: [rtr1]
+TASK [CAPTURE SHOW INTERFACES] ********************************************************************************************************
+ok: [spine1]
 
-TASK [PARSE THE RAW OUTPUT] *****************************************************************************************************************************************************************
-ok: [rtr1]
+TASK [PARSE THE RAW OUTPUT] ***********************************************************************************************************
+ok: [spine1]
 
-TASK [DISPLAY THE PARSED DATA] **************************************************************************************************************************************************************
-ok: [rtr1] => {
+TASK [DISPLAY THE PARSED DATA] ********************************************************************************************************
+ok: [spine1] => {
     "interface_facts": [
         {
-            "GigabitEthernet1": {
+            "Ethernet1": {
                 "config": {
                     "description": null,
-                    "mtu": 1500,
-                    "name": "GigabitEthernet1",
-                    "type": "CSR"
+                    "mtu": "9214",
+                    "name": "Ethernet1",
+                    "type": "Ethernet,"
                 }
             }
         },
         {
-            "Loopback0": {
+            "Ethernet2": {
                 "config": {
                     "description": null,
-                    "mtu": 1514,
-                    "name": "Loopback0",
-                    "type": "Loopback"
+                    "mtu": "9214",
+                    "name": "Ethernet2",
+                    "type": "Ethernet,"
                 }
             }
         },
         {
-            "Loopback1": {
+            "Ethernet3": {
                 "config": {
                     "description": null,
-                    "mtu": 1514,
-                    "name": "Loopback1",
-                    "type": "Loopback"
+                    "mtu": "9214",
+                    "name": "Ethernet3",
+                    "type": "Ethernet,"
                 }
             }
         },
         {
-            "Tunnel0": {
+            "Ethernet4": {
                 "config": {
                     "description": null,
-                    "mtu": 9976,
-                    "name": "Tunnel0",
-                    "type": "Tunnel"
+                    "mtu": "9214",
+                    "name": "Ethernet4",
+                    "type": "Ethernet,"
                 }
             }
         },
-        {
-            "Tunnel1": {
-                "config": {
-                    "description": null,
-                    "mtu": 9976,
-                    "name": "Tunnel1",
-                    "type": "Tunnel"
-                }
-            }
-        },
-        {
-            "VirtualPortGroup0": {
-                "config": {
-                    "description": null,
-                    "mtu": 1500,
-                    "name": "VirtualPortGroup0",
-                    "type": "Virtual"
-                }
-            }
-        }
+        .
+        .
+        .
+        .
+        .
+        <output omitted for brevity>
     ]
 }
-.
-.
-.
-.
-.
-<output omitted for brevity>
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=3    changed=0    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+spine1                     : ok=3    changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 ```
@@ -317,7 +297,6 @@ Our next step is to use the template module to generate a report from the above 
 
 
 ``` yaml
-{%raw%}
 ---
 - name: GENERATE INTERFACE REPORT
   hosts: arista
@@ -355,12 +334,11 @@ Our next step is to use the template module to generate a report from the above 
       delegate_to: localhost
       run_once: yes
 
-{%endraw%}
 ```
 
-> Note: For this lab the  Jinja2 template has been pre-populated for you. Feel free to look at the file **interface_facts.j2** in the **templates** directory.
+> Note: For this lab the Jinja2 template has been pre-populated for you. Feel free to look at the file **interface_facts.j2** in the **templates** directory.
 
-> Note: The debug task has been commented out so that display is consise
+> Note: The debug task has been commented out so that display is concise
 
 #### Step 9
 
@@ -371,37 +349,50 @@ Run the playbook:
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts interface_report.yml
 
-PLAY [GENERATE INTERFACE REPORT] ************************************************************************************************************************************************************
+PLAY [GENERATE INTERFACE REPORT] ******************************************************************************************************
 
-TASK [CAPTURE SHOW INTERFACES] **************************************************************************************************************************************************************
-ok: [rtr1]
-ok: [rtr3]
-ok: [rtr4]
-ok: [rtr2]
+TASK [CAPTURE SHOW INTERFACES] ********************************************************************************************************
+ok: [leaf2]
+ok: [leaf4]
+ok: [spine1]
+ok: [leaf1]
+ok: [leaf3]
+ok: [spine2]
+ok: [host1]
+ok: [host2]
 
-TASK [PARSE THE RAW OUTPUT] *****************************************************************************************************************************************************************
-ok: [rtr3]
-ok: [rtr2]
-ok: [rtr1]
-ok: [rtr4]
+TASK [PARSE THE RAW OUTPUT] ***********************************************************************************************************
+ok: [leaf4]
+ok: [spine1]
+ok: [leaf3]
+ok: [leaf1]
+ok: [leaf2]
+ok: [spine2]
+ok: [host2]
+ok: [host1]
 
-TASK [GENERATE REPORT FRAGMENTS] ************************************************************************************************************************************************************
-changed: [rtr4]
-changed: [rtr2]
-changed: [rtr3]
-changed: [rtr1]
+TASK [GENERATE REPORT FRAGMENTS] ******************************************************************************************************
+changed: [leaf4]
+changed: [leaf2]
+changed: [leaf3]
+changed: [spine1]
+changed: [leaf1]
+changed: [host2]
+changed: [host1]
+changed: [spine2]
 
-TASK [GENERATE A CONSOLIDATED REPORT] *******************************************************************************************************************************************************
-changed: [rtr3]
-ok: [rtr1]
-ok: [rtr4]
-ok: [rtr2]
+TASK [GENERATE A CONSOLIDATED REPORT] *************************************************************************************************
+changed: [leaf1 -> localhost]
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-rtr1                       : ok=4    changed=1    unreachable=0    failed=0   
-rtr2                       : ok=4    changed=1    unreachable=0    failed=0   
-rtr3                       : ok=4    changed=2    unreachable=0    failed=0   
-rtr4                       : ok=4    changed=1    unreachable=0    failed=0   
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=3    changed=1    unreachable=0    failed=0
+host2                      : ok=3    changed=1    unreachable=0    failed=0
+leaf1                      : ok=4    changed=2    unreachable=0    failed=0
+leaf2                      : ok=3    changed=1    unreachable=0    failed=0
+leaf3                      : ok=3    changed=1    unreachable=0    failed=0
+leaf4                      : ok=3    changed=1    unreachable=0    failed=0
+spine1                     : ok=3    changed=1    unreachable=0    failed=0
+spine2                     : ok=3    changed=1    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
 
@@ -416,54 +407,55 @@ Use the `cat` command to view the contents of the final report:
 
 ``` shell
 [arista@ansible ansible-training]$ cat interfaces_report.md
-RTR1
-----
-GigabitEthernet1:
+SPINE1
+-----
+Ethernet1:
   Description:
-  Name: GigabitEthernet1
-  MTU: 1500
+  Name: Ethernet1
+  MTU: 9214
 
-Loopback0:
+Ethernet2:
   Description:
-  Name: Loopback0
-  MTU: 1514
+  Name: Ethernet2
+  MTU: 9214
 
-Loopback1:
+Ethernet3:
   Description:
-  Name: Loopback1
-  MTU: 1514
+  Name: Ethernet3
+  MTU: 9214
 
-Tunnel0:
+Ethernet4:
   Description:
-  Name: Tunnel0
-  MTU: 9976
+  Name: Ethernet4
+  MTU: 9214
+.
+.
+.
+.
+.
+<output omitted for brevity>
 
-Tunnel1:
+SPINE2
+-----
+Ethernet1:
   Description:
-  Name: Tunnel1
-  MTU: 9976
+  Name: Ethernet1
+  MTU: 9214
 
-VirtualPortGroup0:
+Ethernet2:
   Description:
-  Name: VirtualPortGroup0
-  MTU: 1500
+  Name: Ethernet2
+  MTU: 9214
 
-RTR2
-----
-GigabitEthernet1:
+Ethernet3:
   Description:
-  Name: GigabitEthernet1
-  MTU: 1500
+  Name: Ethernet3
+  MTU: 9214
 
-Loopback0:
+Ethernet4:
   Description:
-  Name: Loopback0
-  MTU: 1514
-
-Loopback1:
-  Description:
-  Name: Loopback1
-  MTU: 1514
+  Name: Ethernet4
+  MTU: 9214
 .
 .
 .
