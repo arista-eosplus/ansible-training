@@ -1,5 +1,5 @@
 ---
-- name: GENERATE OS REPORT FROM SWITCHES
+- name: GENERATE MODEL/VERSION REPORT FROM SWITCHES
   hosts: arista
   connection: network_cli
   gather_facts: no
@@ -16,12 +16,12 @@
 
     - name: RENDER FACTS AS A REPORT
       template:
-        src: os_report.j2
+        src: switch_info_report.j2
         dest: reports/{{ inventory_hostname }}.md
 
-    - name: CONSOLIDATE THE IOS DATA
+    - name: CONSOLIDATE THE EOS DATA
       assemble:
         src: reports/
-        dest: network_os_report.md
+        dest: switches_info_report.md
       delegate_to: localhost
       run_once: yes

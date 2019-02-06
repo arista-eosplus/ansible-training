@@ -20,7 +20,7 @@ Create a new playbook called `switch_report.yml` and add the following play defi
 
 ``` yaml
 ---
-- name: GENERATE OS REPORT FROM SWITCHES
+- name: GENERATE MODEL/VERSION REPORT FROM SWITCHES
   hosts: arista
   connection: network_cli
   gather_facts: no
@@ -34,7 +34,7 @@ Add a task that collects the facts using the `eos_facts` module. Recollect that 
 
 ``` yaml
 ---
-- name: GENERATE OS REPORT FROM SWITCHES
+- name: GENERATE MODEL/VERSION REPORT FROM SWITCHES
   hosts: arista
   connection: network_cli
   gather_facts: no
@@ -45,7 +45,7 @@ Add a task that collects the facts using the `eos_facts` module. Recollect that 
 
 ```
 
-> Recall that the **facts** modules automatically populate the **ansible_net_version** and **ansible_net_hostname** variables within the play. You can validate this by running the playbook in verbose mode.
+> Recall that the **facts** modules automatically populates device specific variables such as **ansible_net_version**, **ansible_net_model**, and **ansible_net_hostname** within the play. You can validate this by running the playbook in verbose mode.
 
 
 
@@ -56,9 +56,8 @@ Rather than using debug or verbose mode to display the output on the screen, go 
 
 
 ``` yaml
-{%raw%}
 ---
-- name: GENERATE OS REPORT FROM SWITCHES
+- name: GENERATE MODEL/VERSION REPORT FROM SWITCHES
   hosts: arista
   connection: network_cli
   gather_facts: no
@@ -75,14 +74,13 @@ Rather than using debug or verbose mode to display the output on the screen, go 
 
     - name: RENDER FACTS AS A REPORT
       template:
-        src: os_report.j2
+        src: switch_info_report.j2
         dest: reports/{{ inventory_hostname }}.md
-{%endraw%}
 ```
 
 
 
-Let's break this task down a bit. The `template` module has a `src` parameter that has a value of `os_report.j2`. In the next few steps, we will create this file. This will be the Jinja2 template,  used to generate the desired report. The `dest` parameter specifies the destination file name to render the report into.
+Let's break this task down a bit. The `template` module has a `src` parameter that has a value of `switch_info_report.j2`. In the next few steps, we will create this file. This will be the Jinja2 template,  used to generate the desired report. The `dest` parameter specifies the destination file name to render the report into.
 
 
 #### Step 4
@@ -90,24 +88,25 @@ Let's break this task down a bit. The `template` module has a `src` parameter th
 
 The next step is to create a Jinja2 template. Ansible will look for the template file in the current working directory and within a directory called `templates` automatically. Convention/best-practice is to create the template file within the templates directory.
 
-Using `vi`, `nano` or another text editor, go ahead and create the file called `os_report.j2` under the `templates` directory. Add the following into the template file:
+Using `vi`, `nano` or another text editor, go ahead and create the file called `switch_info_report.j2` under the `templates` directory. Add the following into the template file:
 
 
-{%raw%}
 ``` python
 
 
 {{ inventory_hostname.upper() }}
 ---
-{{ ansible_net_hostname }} : {{ ansible_net_version }}
-
+hostname: {{ ansible_net_hostname }}
+version: {{ ansible_net_version }}
+model: {{ ansible_net_model }}
+managementIP: {{ ansible_net_interfaces.Management1.ipv4.address }}
 
 
 ```
-{%endraw%}  
+
 This file simply contains some of the variables we have been using in our playbooks until now.
 
-> Note: Python inbuilt methods for datatypes are available natively in Jinja2 making it very easy to manipulate the formatting etc.
+> Note: Python build in methods for datatypes are available natively in Jinja2 making it very easy to manipulate the formatting etc.
 
 
 #### Step 5
@@ -183,9 +182,8 @@ While it is nice to have the data, it would be even better to consolidate all th
 
 
 ``` yaml
-{%raw%}
 ---
-- name: GENERATE OS REPORT FROM SWITCHES
+- name: GENERATE MODEL/VERSION REPORT FROM SWITCHES
   hosts: arista
   connection: network_cli
   gather_facts: no
@@ -202,16 +200,15 @@ While it is nice to have the data, it would be even better to consolidate all th
 
     - name: RENDER FACTS AS A REPORT
       template:
-        src: os_report.j2
+        src: switch_info_report.j2
         dest: reports/{{ inventory_hostname }}.md
 
     - name: CONSOLIDATE THE EOS DATA
       assemble:
         src: reports/
-        dest: network_os_report.md
+        dest: switches_info_report.md
       delegate_to: localhost
       run_once: yes
-{%endraw%}
 ```
 
 
@@ -263,11 +260,11 @@ rtr4                       : ok=2    changed=1    unreachable=0    failed=0
 
 #### Step 9
 
-A new file called `network_os_report.md` will now be available in the playbook root. Use the `cat` command to view it's contents:
+A new file called `switches_info_report.md` will now be available in the playbook root. Use the `cat` command to view it's contents:
 
 
 ``` shell
-[arista@ansible ansible-training]$ cat network_os_report.md
+[arista@ansible ansible-training]$ cat switches_info_report.md
 
 
 RTR1

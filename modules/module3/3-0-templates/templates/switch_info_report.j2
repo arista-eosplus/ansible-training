@@ -1,0 +1,6 @@
+{{ inventory_hostname.upper() }}
+---
+hostname: {{ ansible_net_hostname }}
+version: {{ ansible_net_version }}
+model: {{ ansible_net_model }}
+managementIP: {{ ansible_net_interfaces.Management1.ipv4.address }}
