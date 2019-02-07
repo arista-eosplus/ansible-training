@@ -1,0 +1,4 @@
+---
+eos_purge_vlans: no
+eos_ip_routing_enabled: yes
+

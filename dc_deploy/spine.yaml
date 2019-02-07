@@ -1,0 +1,12 @@
+---
+- hosts: spine
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-interfaces
+    - arista.eos-bridging
+    - arista.eos-ipv4
+    - arista.eos-route-control
+    - arista.eos-bgp
