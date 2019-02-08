@@ -1,0 +1,30 @@
+---
+- name: DEMONSTRATE CONDITIONS, LOOPS AND EXTRA VARIABLES
+  hosts: arista
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: DISPLAY EXTRA VARIABLE
+      debug:
+        msg: "User provided command line variable: {{ command_line_variable }}"
+      when: command_line_variable is defined
+
+    - name: GATHER SWITCH FACTS
+      eos_facts:
+
+    - name: DISPLAY IPv4 ADDRS
+      debug:
+        msg: "Found Addr: {{ item }}"
+      loop: "{{ ansible_net_all_ipv4_addresses }}"
+
+    - name: DISPLAY INTERFACES
+      debug:
+        msg: "Found Interface: {{ item.key }}"
+      loop: "{{ ansible_net_interfaces|dict2items }}"
+
+    - name: DISPLAY INTERFACES WITH LINE PROTOCOL NOT UP
+      debug:
+        msg: "Found Interface: {{ item.key }}"
+      loop: "{{ ansible_net_interfaces|dict2items }}"
+      when: item.value.lineprotocol != "up"
