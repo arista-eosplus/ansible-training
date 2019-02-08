@@ -11,7 +11,7 @@ class FilterModule(object):
 
     def valid_eos_version(self, version_string):
         import re
-        match = re.match(r'4\.\d+\.\d+[A-Za-z]+)', version_string)
+        match = re.match(r'4\.\d+\.\d+[A-Za-z]+', version_string)
         if not match:
             raise EOSVersionFormatError("%s isn't a valid EOS version string." % version_string)
         return True
