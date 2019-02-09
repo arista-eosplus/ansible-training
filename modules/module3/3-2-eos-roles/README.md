@@ -1,3 +1,4 @@
+# Exercise 3.2 - Generating Spine/Leaf Switch Config using EOS Roles
 # Sample BGP/MLAG/Varp Playbook
 
 1) Install the needed roles by creating a text file:
