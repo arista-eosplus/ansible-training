@@ -302,7 +302,7 @@ Now that we have our new `valid_eos_version` filter, let's use it in our playboo
 
 Make sure to notice in addition to the new task we've also added the `tags: validate` statement to our initial `eos_facts` task. This is necessary to populate our `ansible_net_version` variable.
 
-New run the playbook.
+Now run the playbook.
 
 ``` shell
 [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts networking_filters.yml --tags validate
@@ -372,7 +372,150 @@ spine2                     : ok=4    changed=0    unreachable=0    failed=0
 And just like that we have created our first custom filter and used it within a playbook with information pulled from the device under test.
 
 
-#### Step 4
+#### Step 5
+
+Let's add one more custom filter to demonstrate the handling of multiple variables and manipulating the data being filtered.
+
+''' Python
+
+#!/usr/bin/python
+# Custom Filters for Ansible
+
+class FilterModule(object):
+
+    def filters(self):
+        return {
+            'valid_eos_version': self.valid_eos_version,
+            'a_simple_filter': self.a_simple_filter,
+        }
+
+    def valid_eos_version(self, version_string):
+        import re
+        match = re.match(r'4\.\d+\.\d+[A-Za-z]+', version_string)
+        if not match:
+            raise EOSVersionFormatError("%s isn't a valid EOS version string." % version_string)
+        return True
+
+    def a_simple_filter(self, string, arg1='', arg2=''):
+        updated_string = string + ' String Modified'
+        if arg1:
+            updated_string += arg1
+        if arg2:
+            updated_string += (' ' + arg2)
+        return updated_string
+
+class EOSVersionFormatError(Exception):
+    pass
+
+'''
+
+This time we've added a new filter named `a_simple_filter` that can take up to two additional arguments on top of the string variable being manipulated. The string passed in will have some standard updates plus the additional arguments appended to it in varying manners if supplied. Finally the resulting string is returned. Notice we've also made sure to add the new filter to the return structure of the `filters` function.
+
+
+#### Step 6
+
+Let's add another task to our playbook to make use of our new `a_simple_filter` filter.
+
+``` yaml
+---
+- name: NETWORKING FILTERS
+  hosts: arista
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: GATHER SWITCH FACTS
+      eos_facts:
+      tags:
+        - validate
+        - modify
+
+    - name: DISPLAY EXTRA ADDRESS AND EXTRA ROUTE
+      debug:
+        msg: 'Extra Address: {{ extra_address | default("None") }} Extra Route: {{ extra_route | default("None") }}'
+
+    - name: VALIDATE EACH EXTRA ADDRESS
+      debug:
+        msg: "{{ extra_address }} is IP: {{ extra_address | ipv4 }}"
+      when: extra_address is defined
+      tags: validate
+
+    - name: VALIDATE EACH EXTRA ROUTE
+      debug:
+        msg: "{{ extra_route }} is network range: {{ extra_route | ipaddr('net') }}"
+      when: extra_route is defined
+      tags: validate
+
+    - name: DISPLAY WHETHER VERSION IS VALID USING CUSTOM FILTER
+      debug:
+        msg: "VERSION VALID: {{ ansible_net_version | valid_eos_version }}"
+      tags: validate
+
+    - name: DISPLAY MODIFIED VERSION USING CUSTOM FILTER
+      debug:
+        msg: "MODIFIED VERSION NO ARGS: {{ ansible_net_version | a_simple_filter }} MODIFIED VERSION WITH ARGS: {{ ansible_net_version | a_simple_filter('extra1', 'extra2')}}"
+      tags: modify
+```
+
+Notice the new `modify` tag added to the first `eos_facts` task and our new task. Now let's run this final playbook to see our formatting filter in action.
+
+``` shell
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts networking_filters.yml --tags modify
+
+PLAY [NETWORKING FILTERS] *************************************************************************************************************
+
+TASK [GATHER SWITCH FACTS] ************************************************************************************************************
+ok: [leaf1]
+ok: [leaf3]
+ok: [spine1]
+ok: [leaf2]
+ok: [leaf4]
+ok: [host1]
+ok: [spine2]
+ok: [host2]
+
+TASK [DISPLAY MODIFIED VERSION USING CUSTOM FILTER] ***********************************************************************************
+ok: [leaf2] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [spine1] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [leaf1] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [leaf3] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [leaf4] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [host1] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [host2] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+ok: [spine2] => {
+    "msg": "MODIFIED VERSION NO ARGS: 4.21.2F String Modified MODIFIED VERSION WITH ARGS: 4.21.2F String Modifiedextra1 extra2"
+}
+
+PLAY RECAP ****************************************************************************************************************************
+host1                      : ok=2    changed=0    unreachable=0    failed=0
+host2                      : ok=2    changed=0    unreachable=0    failed=0
+leaf1                      : ok=2    changed=0    unreachable=0    failed=0
+leaf2                      : ok=2    changed=0    unreachable=0    failed=0
+leaf3                      : ok=2    changed=0    unreachable=0    failed=0
+leaf4                      : ok=2    changed=0    unreachable=0    failed=0
+spine1                     : ok=2    changed=0    unreachable=0    failed=0
+spine2                     : ok=2    changed=0    unreachable=0    failed=0
+
+[arista@ansible ansible-training]$
+
+```
+
+With these two simple examples it would be easy to build more useful filters that provide valuable function to your playbooks. Just one example would be a filter for validating device hostname formats if your environment has some standardized format all hostnames are expected to follow.
+
 
 # Complete
 

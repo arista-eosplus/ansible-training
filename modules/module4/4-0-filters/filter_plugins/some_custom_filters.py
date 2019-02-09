@@ -16,8 +16,12 @@ class FilterModule(object):
             raise EOSVersionFormatError("%s isn't a valid EOS version string." % version_string)
         return True
 
-    def a_simple_filter(self, string):
+    def a_simple_filter(self, string, arg1='', arg2=''):
         updated_string = string + ' String Modified'
+        if arg1:
+            updated_string += arg1
+        if arg2:
+            updated_string += (' ' + arg2)
         return updated_string
 
 class EOSVersionFormatError(Exception):
