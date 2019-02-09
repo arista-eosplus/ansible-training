@@ -1,11 +1,11 @@
 ---
-hostname: dc1-tora
+hostname: dc1-leaf2
 
 vlans:
   - vlanid: 1
     name: default
   - vlanid: 2
-    name: app2
+    name: production
 
 interfaces:
   - name: Loopback0
@@ -19,11 +19,11 @@ interfaces:
 
 ip_interfaces:
   - name: Loopback0
-    address: 1.1.1.10/32
+    address: 1.1.1.11/32
   - name: Ethernet2
-    address: 10.1.1.1/31
+    address: 10.1.1.3/31
   - name: Ethernet3
-    address: 10.1.2.1/31
+    address: 10.1.2.3/31
 
 ipv4_static_routes:
   - ip_dest: 0.0.0.0/0
@@ -39,14 +39,14 @@ varp_interfaces:
     name: Varp_Vlan1001
     description: My Vlan1001
     enable: true
-    interface_addr: 192.168.1.3/24
+    interface_addr: 192.168.1.4/24
     virtual_addrs:
       - 192.168.1.1
   - vlanid: 1002
     name: Varp_Vlan1002
     description: My Vlan1001
     enable: true
-    interface_addr: 192.168.2.3/24
+    interface_addr: 192.168.2.4/24
     virtual_addrs:
       - 192.168.2.1
 
@@ -69,9 +69,9 @@ mlag:
     mlag_trunk_group: mlagpeer
     mlag_shutdown: false
     local_if_vlan: Vlan1024
-    local_if_ip_address: 10.0.0.1/30
+    local_if_ip_address: 10.0.0.2/30
     local_if_disable_spanning_tree: true
-    peer_address: 10.0.0.2
+    peer_address: 10.0.0.1
     peer_link_if: Port-Channel10
     peer_link_mode: trunk
     peer_link_lacp_mode: active

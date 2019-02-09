@@ -2,7 +2,7 @@
 # Connection to the devices
 provider:
   host: '{{ ansible_host }}'
-  username: admin
+  username: arista
   password: arista
   use_ssl: false
   transport: eapi
