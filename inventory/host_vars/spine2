@@ -1,2 +1,5 @@
 extra_variable: value
 spine_description: value
+
+extra_address: 10.0.0.3
+extra_address_with_mask: 10.0.0.4/24
