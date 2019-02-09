@@ -1,5 +1,5 @@
 extra_variable: value
 leaf_description: value
 
-extra_address: 10.0.0.13
-extra_address_with_mask: 10.0.0.14/24
+extra_address: 10.0.0.12
+extra_route: 10.0.200.0/24
