@@ -1,8 +1,6 @@
 ---
 hostname: dc1-spine1
 
-eos_host_ip: 172.16.130.201
-
 vlans:
   - vlanid: 1
     name: default
@@ -31,23 +29,12 @@ ip_interfaces:
   - name: Ethernet3
     address: 10.1.1.2/31
 
-
-acls:
-  - name: ACL-1
-    action: permit
-    seqno: 50
-    description: My wonderful acl
-    type: standard
-    srcaddr: 10.10.10.10
-    srcprefixlen: 32
-
 ipv4_static_routes:
   - ip_dest: 0.0.0.0/0
     next_hop: Management1
     next_hop_ip: 172.16.130.2
     route_name: Default
     tag: 100
-
 
 bgp:
   enable: true

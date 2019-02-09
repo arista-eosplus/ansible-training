@@ -1,8 +1,6 @@
 ---
 hostname: dc1-torb
 
-eos_host_ip: 172.16.130.204
-
 vlans:
   - vlanid: 1
     name: default
@@ -26,16 +24,6 @@ ip_interfaces:
     address: 10.1.1.3/31
   - name: Ethernet3
     address: 10.1.2.3/31
-
-
-acls:
-  - name: ACL-1
-    action: permit
-    seqno: 50
-    description: My wonderful acl
-    type: standard
-    srcaddr: 10.10.10.10
-    srcprefixlen: 32
 
 ipv4_static_routes:
   - ip_dest: 0.0.0.0/0
