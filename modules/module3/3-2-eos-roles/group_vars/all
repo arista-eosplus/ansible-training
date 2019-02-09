@@ -1,7 +1,4 @@
 ---
-# make ansible play nice in a virtualenv
-# ansible_python_interpreter: python
-
 # Connection to the devices
 provider:
   host: '{{ ansible_host }}'
@@ -10,7 +7,6 @@ provider:
   use_ssl: false
   transport: eapi
   validate_certs: false
-
 
 eos_users:
   - name: simplebob
