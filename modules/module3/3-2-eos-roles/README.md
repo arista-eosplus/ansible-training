@@ -84,7 +84,6 @@ Let's run another ansible-galaxy command to view our installed roles.
 - arista.eos-route-control, v2.1.8
 - arista.eos-virtual-router, v2.1.8
 - arista.eos-bgp, v2.1.8
-[arista@ansible ansible-training]$
 ```
 
 All roles from our `newroles.yml` file are listed in addition to the `ansible-network.network-engine` role we installed in the previous lab.
@@ -110,9 +109,7 @@ leaf2 ansible_host=192.168.0.15
 
 Using this new hosts file we will only be working with two spines and two leafs.
 
-Next let's some new group_vars/ needed for configuring our site.
-
-Within group_vars/ create a new file named `all` and add the following:
+Next let's add some new group_vars/ needed for configuring our site. Within group_vars/ create a new file named `all` and add the following:
 
 ``` shell
 [arista@ansible ansible-training]$ cat inventory/group_vars/all
@@ -153,7 +150,7 @@ eos_purge_vlans: no
 eos_ip_routing_enabled: yes
 ```
 
-These two files are currently the same. Both containing the `eos_ip_routing_enabled` variable that is set to enabling IP routing on the switch and `eos_purge_vlans` that is set for preventing the new configurations done by the `arista.eos-bridging` role from removing extra vlans found in the configuration not associated with variables. If we later need to add additional configuration variables for all `leafs` or all `spines`, we have these group_vars/ files to add them too.
+These two files are currently the same. Both containing the `eos_ip_routing_enabled` variable that is set to enabling IP routing on the switch and `eos_purge_vlans` that is set for preventing the new configurations done by the `arista.eos-bridging` role from removing extra vlans found in the configuration that do not have variables associated with them. If we later need to add additional configuration variables for all `leafs` or all `spines`, we have these group_vars/ files to add them too.
 
 Next we will add or update four of our host_vars/ files.
 
@@ -325,21 +322,23 @@ spine2                     : ok=9    changed=2    unreachable=0    failed=0
 [arista@ansible ansible-training]$
 ```
 
-The `arista.eos-system` role made a couple changes for all of our devices. This is what we would expect being that we added a new user into our group_vars/all variables file and gave each device a custom hostname in their unique host_vars/ file.
+The `arista.eos-system` role made a couple changes for all of our devices. This is what we would expect given that we added a new user into our group_vars/all variables file and gave each device a custom hostname in their unique host_vars/ file.
 
 Let's connect to spine1 to see the changes on the switch.
 
 ``` shell
 [arista@ansible ansible-training]$ ssh arista@192.168.0.10
 dc1-spine1#show run | include username
+
 ... <output omitted for brevity> ...
+
 username newexampleuser privilege 0 role network-operator nopassword
 dc1-spine1#
-[arista@ansible ansible-training]$
 ```
- You should see the new hostname `dc1-spine` and the `newexampleuser` configured.
 
- Now let's try running this same playbook again. Remember that Ansible modules/roles should be idempotent when they can, meaning that they only make changes when necessary.
+You should see the new hostname `dc1-spine` and the `newexampleuser` configured.
+
+Now let's try running this same playbook again. Remember that Ansible modules/roles should be idempotent when they can, meaning that they only make changes when necessary.
 
  ``` shell
  [arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts_for_eos_roles site.yml
@@ -367,9 +366,7 @@ spine2                     : ok=6    changed=0    unreachable=0    failed=0
 #### Step 4
 
 
-Now let's add some more substantial configurations to the switches in our site and use more of the `arista.eos` roles.
-
-Update each of the host_vars/ files as shown below:
+Now let's add some more substantial configurations to the switches in our site and use more of the `arista.eos` roles. Update each of the host_vars/ files as shown below:
 
 ``` shell
 [arista@ansible ansible-training]$ cat inventory/host_vars/spine1
@@ -824,7 +821,7 @@ bgp:
 
 The new sections variable to role mappings are shown below:
 
-ipv4_static_route - `arista.eos-route-control`
+ipv4_static_routes - `arista.eos-route-control`
 bgp - `arista.eos-bgp`
 
 Since these there variable sections have been added to all of our host_vars/ lets add these roles to our `spine.yml` and `leaf.yml` playbooks.
@@ -881,9 +878,7 @@ spine2                     : ok=23   changed=4    unreachable=0    failed=0
 [arista@ansible ansible-training]$
 ```
 
-With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them.
-
-Once again running the playbook a second time does not make any changes because of the roles are idempotent.
+With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them. Once again running the playbook a second time does not make any changes because of the roles are idempotent.
 
 
 #### Step 6
@@ -1107,6 +1102,34 @@ spine2                     : ok=18   changed=0    unreachable=0    failed=0
 ```
 
 After this most recent run only the leaf switches have changes. Connect to one of the leaf switches and execute a `show mlag` to verify the feature is operational.
+
+``` shell
+[arista@ansible ansible-training]$ ssh arista@192.168.0.14
+dc1-leaf1#show mlag
+MLAG Configuration:
+domain-id              :               mlag1
+local-interface        :            Vlan1024
+peer-address           :            10.0.0.2
+peer-link              :      Port-Channel10
+peer-config            :          consistent
+
+MLAG Status:
+state                  :              Active
+negotiation status     :           Connected
+peer-link status       :                  Up
+local-int status       :                  Up
+system-id              :   2e:c2:60:a7:83:ba
+dual-primary detection :            Disabled
+
+MLAG Ports:
+Disabled               :                   0
+Configured             :                   0
+Inactive               :                   0
+Active-partial         :                   0
+Active-full            :                   0
+
+dc1-leaf1#
+```
 
 We have just used Ansible to configure multiple features across a full site. With our variables set and simple playbooks that leverage pre-built roles we can configure or verify the configuration of a full site of devices.
 
