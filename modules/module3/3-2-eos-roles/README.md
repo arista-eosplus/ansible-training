@@ -1,6 +1,6 @@
 # Exercise 3.2 - Generating Spine/Leaf Switch Config using EOS Roles
 
-In this lab we will use the Arista created Roles on Ansible Galaxy to build out a Spine - Leaf configuration.
+In this lab we will use the Arista created Roles on Ansible Galaxy to build out a Spine - Leaf site configuration.
 
 
 #### Step 1
@@ -19,7 +19,6 @@ First we will need to install the needed roles. Let's do this by creating a new 
 - src: arista.eos-system
 - src: arista.eos-virtual-router
 - src: arista.eos-vxlan
-[arista@ansible ansible-training]$
 ```
 
 The following command will install the roles referenced in `newroles.yml` required to configure our site switches.
@@ -107,7 +106,6 @@ spine2 ansible_host=192.168.0.11
 [leafs]
 leaf1 ansible_host=192.168.0.14
 leaf2 ansible_host=192.168.0.15
-[arista@ansible ansible-training]$
 ```
 
 Using this new hosts file we will only be working with two spines and two leafs.
@@ -133,7 +131,6 @@ eos_users:
     nopassword: true
     privilege: 0
     role: network-operator
-[arista@ansible ansible-training]$
 ```
 
 The `provider` variables added will be used by Ansible for connection to the switches. The `provider` is the old method of connecting to network devices before Ansible 2.5. The current EOS roles still require the old connection method so we will provide the necessary variables here.
@@ -147,7 +144,6 @@ Next let's add two new files in group_vars/ one for the `leafs` group and one fo
 ---
 eos_purge_vlans: no
 eos_ip_routing_enabled: yes
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -155,7 +151,6 @@ eos_ip_routing_enabled: yes
 ---
 eos_purge_vlans: no
 eos_ip_routing_enabled: yes
-[arista@ansible ansible-training]$
 ```
 
 These two files are currently the same. Both containing the `eos_ip_routing_enabled` variable that is set to enabling IP routing on the switch and `eos_purge_vlans` that is set for preventing the new configurations done by the `arista.eos-bridging` role from removing extra vlans found in the configuration not associated with variables. If we later need to add additional configuration variables for all `leafs` or all `spines`, we have these group_vars/ files to add them too.
@@ -166,28 +161,24 @@ Next we will add or update four of our host_vars/ files.
 [arista@ansible ansible-training]$ cat inventory/host_vars/spine1
 ---
 hostname: dc1-spine1
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
 [arista@ansible ansible-training]$ cat inventory/host_vars/spine2
 ---
 hostname: dc1-spine2
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
 [arista@ansible ansible-training]$ cat inventory/host_vars/leaf1
 ---
 hostname: dc1-leaf1
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
 [arista@ansible ansible-training]$ cat inventory/host_vars/leaf2
 ---
 hostname: dc1-leaf2
-[arista@ansible ansible-training]$
 ```
 
 In these host_vars/ files we have provided a unique hostname variable that the `arista.eos-system` role will use to configure the hostname on the respective device.
@@ -412,7 +403,6 @@ ip_interfaces:
     address: 10.1.1.0/31
   - name: Ethernet3
     address: 10.1.1.2/31
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -447,7 +437,6 @@ ip_interfaces:
     address: 10.1.2.0/31
   - name: Ethernet3
     address: 10.1.2.2/31
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -478,7 +467,6 @@ ip_interfaces:
     address: 10.1.1.1/31
   - name: Ethernet3
     address: 10.1.2.1/31
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -509,7 +497,6 @@ ip_interfaces:
     address: 10.1.1.3/31
   - name: Ethernet3
     address: 10.1.2.3/31
-[arista@ansible ansible-training]$
 ```
 
 With these additional variables added for each device we can see that there will be a couple of vlans configured per switch and several interfaces configured for IPv4 connections. To speed up this lab I am including a mapping of what configuration variables apply to what role here.
@@ -671,7 +658,6 @@ bgp:
       remote_as: 65002
       peer_group: demoleaf
       enable: true
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -732,7 +718,6 @@ bgp:
       remote_as: 65002
       peer_group: demoleaf
       enable: true
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -784,7 +769,6 @@ bgp:
     - name: 10.1.0.0/16
       peer_group: demoleaf
       remote_as: 65001
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -836,7 +820,6 @@ bgp:
     - name: 10.1.0.0/16
       peer_group: demoleaf
       remote_as: 65001
-[arista@ansible ansible-training]$
 ```
 
 The new sections variable to role mappings are shown below:
@@ -990,7 +973,6 @@ varp_interfaces:
     interface_addr: 192.168.2.3/24
     virtual_addrs:
       - 192.168.2.1
-[arista@ansible ansible-training]$
 ```
 
 ``` shell
@@ -1075,7 +1057,6 @@ varp_interfaces:
     interface_addr: 192.168.2.4/24
     virtual_addrs:
       - 192.168.2.1
-[arista@ansible ansible-training]$
 ```
 
 The new sections variable to role mappings are shown below:
