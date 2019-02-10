@@ -208,7 +208,6 @@ First create a playbook for the `spines` group called `spine.yml` and add the fo
 
   roles:
     - arista.eos-system
-
 ```
 
 Next lets create a playbook for the `leafs` group called `leaf.yml` and add the following:
@@ -221,7 +220,6 @@ Next lets create a playbook for the `leafs` group called `leaf.yml` and add the 
 
   roles:
     - arista.eos-system
-
 ```
 
 So far both of these playbooks look almost the same, both executing the `arista.eos-system` role. The only difference is the `hosts` statement which specifies the group of devices the playbook will work on. As we continue building out the configurations these two playbooks will differ more.
@@ -232,7 +230,6 @@ Instead of having to execute these two playbook separately, let's create one mor
 ---
 - include: spine.yml
 - include: leaf.yml
-
 ```
 
 This playbook is using the Ansible `include` statement to execute both our `spine.yml` and `leaf.yml` playbooks in one shot.
@@ -335,7 +332,6 @@ spine1                     : ok=9    changed=2    unreachable=0    failed=0
 spine2                     : ok=9    changed=2    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
-
 ```
 
 The `arista.eos-system` role made a couple changes for all of our devices. This is what we would expect being that we added a new user into our group_vars/all variables file and gave each device a custom hostname in their unique host_vars/ file.
@@ -372,7 +368,6 @@ spine1                     : ok=6    changed=0    unreachable=0    failed=0
 spine2                     : ok=6    changed=0    unreachable=0    failed=0
 
  [arista@ansible ansible-training]$
-
  ```
 
  Notice that the roles are idempotent because the devices are already in the state expected by the configured variables.
@@ -536,7 +531,6 @@ Since these there variable sections have been added to all of our host_vars/ let
     - arista.eos-bridging
     - arista.eos-interfaces
     - arista.eos-ipv4
-
 ```
 
 ``` yaml
@@ -550,7 +544,6 @@ Since these there variable sections have been added to all of our host_vars/ let
     - arista.eos-bridging
     - arista.eos-interfaces
     - arista.eos-ipv4
-
 ```
 
 At this point our playbooks are still almost the same. Let's run the updated playbook.
@@ -608,7 +601,6 @@ spine1                     : ok=13   changed=3    unreachable=0    failed=0
 spine2                     : ok=13   changed=3    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
-
 ```
 
 With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them.
@@ -867,7 +859,6 @@ Since these there variable sections have been added to all of our host_vars/ let
     - arista.eos-ipv4
     - arista.eos-route-control
     - arista.eos-bgp
-
 ```
 
 ``` yaml
@@ -883,7 +874,6 @@ Since these there variable sections have been added to all of our host_vars/ let
     - arista.eos-ipv4
     - arista.eos-route-control
     - arista.eos-bgp
-
 ```
 
 Let's run the updated playbook.
@@ -906,7 +896,6 @@ spine1                     : ok=23   changed=4    unreachable=0    failed=0
 spine2                     : ok=23   changed=4    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
-
 ```
 
 With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them.
@@ -1112,7 +1101,6 @@ Since these variable sections have only been added to the leaf switches host_var
     - arista.eos-bgp
     - arista.eos-mlag
     - arista.eos-virtual-router
-
 ```
 
 Let's run our playbook one more time to complete our full site configuration.
@@ -1135,10 +1123,9 @@ spine1                     : ok=18   changed=0    unreachable=0    failed=0
 spine2                     : ok=18   changed=0    unreachable=0    failed=0
 
 [arista@ansible ansible-training]$
-
 ```
 
-After this most recent run only the leaf switches have changes. You can connect to these switches and run some show commands for mlag and varp to verify.
+After this most recent run only the leaf switches have changes. Connect to one of the leaf switches and execute a `show mlag` to verify the feature is operational.
 
 We have just used Ansible to configure multiple features across a full site. With our variables set and simple playbooks that leverage pre-built roles we can configure or verify the configuration of a full site of devices.
 
