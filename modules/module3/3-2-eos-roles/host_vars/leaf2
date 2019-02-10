@@ -32,24 +32,6 @@ ipv4_static_routes:
     route_name: Default
     tag: 100
 
-virtual_mac_addr: "00:1c:73:00:00:99"
-
-varp_interfaces:
-  - vlanid: 1001
-    name: Varp_Vlan1001
-    description: My Vlan1001
-    enable: true
-    interface_addr: 192.168.1.4/24
-    virtual_addrs:
-      - 192.168.1.1
-  - vlanid: 1002
-    name: Varp_Vlan1002
-    description: My Vlan1001
-    enable: true
-    interface_addr: 192.168.2.4/24
-    virtual_addrs:
-      - 192.168.2.1
-
 bgp:
   enable: true
   bgp_as: 65002
@@ -78,3 +60,21 @@ mlag:
     peer_link_enable: true
     peer_link_members:
       - Ethernet1
+
+virtual_mac_addr: "00:1c:73:00:00:99"
+
+varp_interfaces:
+  - vlanid: 1001
+    name: Varp_Vlan1001
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.1.4/24
+    virtual_addrs:
+      - 192.168.1.1
+  - vlanid: 1002
+    name: Varp_Vlan1002
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.2.4/24
+    virtual_addrs:
+      - 192.168.2.1

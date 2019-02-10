@@ -9,7 +9,7 @@ provider:
   validate_certs: false
 
 eos_users:
-  - name: simplebob
+  - name: newexampleuser
     nopassword: true
     privilege: 0
     role: network-operator

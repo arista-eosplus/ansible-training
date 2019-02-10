@@ -5,8 +5,8 @@
 
   roles:
     - arista.eos-system
-    - arista.eos-interfaces
     - arista.eos-bridging
+    - arista.eos-interfaces
     - arista.eos-ipv4
     - arista.eos-route-control
     - arista.eos-bgp
