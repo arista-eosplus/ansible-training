@@ -261,7 +261,7 @@ class EOSVersionFormatError(Exception):
 
 We now have an additional filter function defined named `valid_eos_version`. This new function accepts one variable, which will be our EOS version, and uses a regular expression to validate it is a 4.X.X version. If the version is not a 4.X.X version an Exception will be raised. This is essentially an error in Python. If the version is a valid 4.X.X version our function will return True. The last item added is that we had to make sure our new filter function `valid_eos_version` is being returned by the `filters` function within our `FilterModule`.
 
-> Note: within python the **self** variable is a variable that refers to the class object itself.
+> Note: within Python the **self** variable is a variable that refers to the class object itself.
 
 
 #### Step 4
