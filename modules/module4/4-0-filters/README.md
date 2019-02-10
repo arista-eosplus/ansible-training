@@ -92,7 +92,7 @@ ok: [leaf2] => {
     "msg": "Extra Address: 10.0.0.12 Extra Route: 10.0.200.0/24"
 }
 ok: [spine1] => {
-    "msg": "Extra Address: 10.0.0.1 Extra Route: 10.10.0.0/24"
+    "msg": "Extra Address: 10.0.0.111111 Extra Route: 10.10.0.0/24"
 }
 ok: [spine2] => {
     "msg": "Extra Address: 10.0.0.2 Extra Route: 10.11.0.0/24"
