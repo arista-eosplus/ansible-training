@@ -32,12 +32,14 @@ View the contents of one of these files.
 extra_variable: value
 spine_description: value
 
-extra_address: 10.0.0.1
+extra_address: 10.0.0.111111
 extra_route: 10.10.0.0/24
 [arista@ansible ansible-training]$
 ```
 
 Notice the `extra_address` and `extra_route` variables. Let's use filters to do some validation and manipulation of these variables and give them a default value when they don't exist for a given device.
+
+> Note: The extra_address variable is an invalid IP address value intentionally.
 
 Let's add one more task to our playbook.
 
@@ -217,7 +219,7 @@ First create a new directory `filter_plugins`. This directory is where our Pytho
 
 Within the `filter_plugins` directory create a new Python file `some_custom_filters.py` with the following skeleton content.
 
-''' Python
+``` python
 
 #!/usr/bin/python
 # Custom Filters for Ansible
@@ -227,13 +229,13 @@ class FilterModule(object):
     def filters(self):
 
 
-'''
+```
 
 Custom filters must be built within the class `FilterModule` and returned via the `filters` function within this class. Our current module has no filter functions defined to be returned by the `filters` function.
 
 Let's add our first filter that we can use to validate our EOS version.
 
-''' Python
+``` python
 
 #!/usr/bin/python
 # Custom Filters for Ansible
@@ -255,7 +257,7 @@ class FilterModule(object):
 class EOSVersionFormatError(Exception):
     pass
 
-'''
+```
 
 We now have an additional filter function defined named `valid_eos_version`. This new function accepts one variable, which will be our EOS version, and uses a regular expression to validate it is a 4.X.X version. If the version is not a 4.X.X version an Exception will be raised. This is essentially an error in Python. If the version is a valid 4.X.X version our function will return True. The last item added is that we had to make sure our new filter function `valid_eos_version` is being returned by the `filters` function within our `FilterModule`.
 
@@ -376,7 +378,7 @@ And just like that we have created our first custom filter and used it within a 
 
 Let's add one more custom filter to demonstrate the handling of multiple variables and manipulating the data being filtered.
 
-''' Python
+``` python
 
 #!/usr/bin/python
 # Custom Filters for Ansible
@@ -407,7 +409,7 @@ class FilterModule(object):
 class EOSVersionFormatError(Exception):
     pass
 
-'''
+```
 
 This time we've added a new filter named `a_simple_filter` that can take up to two additional arguments on top of the string variable being manipulated. The string passed in will have some standard updates plus the additional arguments appended to it in varying manners if supplied. Finally the resulting string is returned. Notice we've also made sure to add the new filter to the return structure of the `filters` function.
 
