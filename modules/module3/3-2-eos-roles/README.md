@@ -345,7 +345,7 @@ Let's connect to spine1 to see the changes on the switch.
 ``` shell
 [arista@ansible ansible-training]$ ssh arista@192.168.0.10
 dc1-spine1#show run | include username
-... <some output omitted> ...
+... <output omitted for brevity> ...
 username newexampleuser privilege 0 role network-operator nopassword
 dc1-spine1#
 [arista@ansible ansible-training]$
@@ -359,11 +359,11 @@ dc1-spine1#
 
 PLAY [spines] *************************************************************************************************************************
 
-... <some output omitted> ...
+... <output omitted for brevity> ...
 
 PLAY [leafs] **************************************************************************************************************************
 
-... <some output omitted> ...
+... <output omitted for brevity> ...
 
 PLAY RECAP ****************************************************************************************************************************
 leaf1                      : ok=6    changed=0    unreachable=0    failed=0
@@ -381,27 +381,770 @@ spine2                     : ok=6    changed=0    unreachable=0    failed=0
 #### Step 4
 
 
+Now let's add some more substantial configurations to the switches in our site and use more of the `arista.eos` roles.
 
-2) The playbook can be executed by running:
+Update each of the host_vars/ files as shown below:
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/spine1
+---
+hostname: dc1-spine1
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet2
+    description: '[BGP]Connection to Leaf1'
+    enable: true
+  - name: Ethernet3
+    description: '[BGP]Connection to Leaf2'
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.1/32
+  - name: Loopback1
+    address: 2.2.2.1/32
+  - name: Ethernet2
+    address: 10.1.1.0/31
+  - name: Ethernet3
+    address: 10.1.1.2/31
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/spine2
+---
+hostname: dc1-spine2
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to Leaf1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to Leaf2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.2/32
+  - name: Loopback1
+    address: 2.2.2.2/32
+  - name: Ethernet2
+    address: 10.1.2.0/31
+  - name: Ethernet3
+    address: 10.1.2.2/31
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf1
+---
+hostname: dc1-leaf1
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: app2
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.10/32
+  - name: Ethernet2
+    address: 10.1.1.1/31
+  - name: Ethernet3
+    address: 10.1.2.1/31
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf2
+---
+hostname: dc1-leaf2
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.11/32
+  - name: Ethernet2
+    address: 10.1.1.3/31
+  - name: Ethernet3
+    address: 10.1.2.3/31
+[arista@ansible ansible-training]$
+```
+
+With these additional variables added for each device we can see that there will be a couple of vlans configured per switch and several interfaces configured for IPv4 connections. To speed up this lab I am including a mapping of what configuration variables apply to what role here.
+
+vlans - `arista.eos-bridging`
+interfaces - `arista.eos-interfaces`
+ip_interfaces - `arista.eos-ipv4`
+
+Since these there variable sections have been added to all of our host_vars/ lets add these roles to our `spine.yml` and `leaf.yml` playbooks.
+
+``` yaml
+---
+- hosts: spines
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-bridging
+    - arista.eos-interfaces
+    - arista.eos-ipv4
 
 ```
-ansible-playbook -i hosts site.yml
+
+``` yaml
+---
+- hosts: leafs
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-bridging
+    - arista.eos-interfaces
+    - arista.eos-ipv4
+
 ```
 
-The ```site.yml``` playbook is divided into to two child playbooks ```spine.yml``` and ```leaf.yml```.  As their name implies ```spine.yml``` will run against hosts in the `spines` group and ```leaf.yml``` will run against hosts in the `leafs` group.
+At this point our playbooks are still almost the same. Let's run the updated playbook.
 
-To feed the correct IP addresses/username into the play change the requisite host_vars/ or group_vars/ file to meet your needs.
+``` shell
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts_for_eos_roles site.yml
 
-For example if my host file looks like this:
+PLAY [spines] *************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+PLAY [leafs] **************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+TASK [arista.eos-interfaces : Arista EOS interface resources (Ansible >= 2.2)] ********************************************************
+changed: [leaf2] => (item={u'enable': True, u'name': u'Loopback0'})
+changed: [leaf1] => (item={u'enable': True, u'name': u'Loopback0'})
+changed: [leaf2] => (item={u'enable': True, u'name': u'Ethernet2', u'description': u'[BGP]Connection to spine1'})
+changed: [leaf1] => (item={u'enable': True, u'name': u'Ethernet2', u'description': u'[BGP]Connection to spine1'})
+changed: [leaf2] => (item={u'enable': True, u'name': u'Ethernet3', u'description': u'[BGP]Connection to spine2'})
+changed: [leaf1] => (item={u'enable': True, u'name': u'Ethernet3', u'description': u'[BGP]Connection to spine2'})
+
+TASK [arista.eos-ipv4 : set_fact] *****************************************************************************************************
+skipping: [leaf1]
+skipping: [leaf2]
+
+TASK [arista.eos-ipv4 : Gather EOS configuration] *************************************************************************************
+skipping: [leaf1]
+skipping: [leaf2]
+
+TASK [arista.eos-ipv4 : Save EOS configuration] ***************************************************************************************
+skipping: [leaf1]
+skipping: [leaf2]
+
+TASK [arista.eos-ipv4 : Include the Arista EOS IPv4 resources] ************************************************************************
+included: /home/arista/.ansible/roles/arista.eos-ipv4/tasks/resources2.2.yml for leaf1, leaf2
+
+TASK [arista.eos-ipv4 : Arista EOS IPv4 resources (Ansible >= 2.1)] *******************************************************************
+changed: [leaf2] => (item={u'name': u'Loopback0', u'address': u'1.1.1.11/32'})
+changed: [leaf1] => (item={u'name': u'Loopback0', u'address': u'1.1.1.10/32'})
+changed: [leaf2] => (item={u'name': u'Ethernet2', u'address': u'10.1.1.3/31'})
+changed: [leaf1] => (item={u'name': u'Ethernet2', u'address': u'10.1.1.1/31'})
+changed: [leaf2] => (item={u'name': u'Ethernet3', u'address': u'10.1.2.3/31'})
+changed: [leaf1] => (item={u'name': u'Ethernet3', u'address': u'10.1.2.1/31'})
+
+RUNNING HANDLER [arista.eos-system : save running config] *****************************************************************************
+ok: [leaf2]
+ok: [leaf1]
+
+PLAY RECAP ****************************************************************************************************************************
+leaf1                      : ok=13   changed=3    unreachable=0    failed=0
+leaf2                      : ok=13   changed=3    unreachable=0    failed=0
+spine1                     : ok=13   changed=3    unreachable=0    failed=0
+spine2                     : ok=13   changed=3    unreachable=0    failed=0
+
+[arista@ansible ansible-training]$
 
 ```
-[spines]
-spine1 ansible_host=<ip address>
-spine2 ansible_host=<ip address>
 
-[leafs]
-leaf1 ansible_host=<ip address>
-leaf2 ansible_host=<ip address>
+With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them.
+
+Once again running the playbook a second time does not make any changes because of the roles are idempotent.
+
+
+#### Step 5
+
+
+Our next step will be to add some variables to configure a static route and BGP on each switch. Update each devices host_vars/ file as shown below:
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/spine1
+---
+hostname: dc1-spine1
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet2
+    description: '[BGP]Connection to Leaf1'
+    enable: true
+  - name: Ethernet3
+    description: '[BGP]Connection to Leaf2'
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.1/32
+  - name: Loopback1
+    address: 2.2.2.1/32
+  - name: Ethernet2
+    address: 10.1.1.0/31
+  - name: Ethernet3
+    address: 10.1.1.2/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65001
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  neighbors:
+    - name: 10.1.1.1
+      remote_as: 65002
+      peer_group: demoleaf
+      enable: true
+    - name: 10.1.1.3
+      remote_as: 65002
+      peer_group: demoleaf
+      enable: true
+[arista@ansible ansible-training]$
 ```
 
-If I needed to change the IP address that will be configured on spine1 I would edit the ```host_vars/spine1``` file.
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/spine2
+---
+hostname: dc1-spine2
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Loopback1
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to Leaf1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to Leaf2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.2/32
+  - name: Loopback1
+    address: 2.2.2.2/32
+  - name: Ethernet2
+    address: 10.1.2.0/31
+  - name: Ethernet3
+    address: 10.1.2.2/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65001
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  neighbors:
+    - name: 10.1.2.1
+      remote_as: 65002
+      peer_group: demoleaf
+      enable: true
+    - name: 10.1.2.3
+      remote_as: 65002
+      peer_group: demoleaf
+      enable: true
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf1
+---
+hostname: dc1-leaf1
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: app2
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.10/32
+  - name: Ethernet2
+    address: 10.1.1.1/31
+  - name: Ethernet3
+    address: 10.1.2.1/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65002
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  listeners:
+    - name: 10.1.0.0/16
+      peer_group: demoleaf
+      remote_as: 65001
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf2
+---
+hostname: dc1-leaf2
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.11/32
+  - name: Ethernet2
+    address: 10.1.1.3/31
+  - name: Ethernet3
+    address: 10.1.2.3/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65002
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  listeners:
+    - name: 10.1.0.0/16
+      peer_group: demoleaf
+      remote_as: 65001
+[arista@ansible ansible-training]$
+```
+
+The new sections variable to role mappings are shown below:
+
+ipv4_static_route - `arista.eos-route-control`
+bgp - `arista.eos-bgp`
+
+Since these there variable sections have been added to all of our host_vars/ lets add these roles to our `spine.yml` and `leaf.yml` playbooks.
+
+``` yaml
+---
+- hosts: spines
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-bridging
+    - arista.eos-interfaces
+    - arista.eos-ipv4
+    - arista.eos-route-control
+    - arista.eos-bgp
+
+```
+
+``` yaml
+---
+- hosts: leafs
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-bridging
+    - arista.eos-interfaces
+    - arista.eos-ipv4
+    - arista.eos-route-control
+    - arista.eos-bgp
+
+```
+
+Let's run the updated playbook.
+
+``` shell
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts_for_eos_roles site.yml
+
+PLAY [spines] *************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+PLAY [leafs] **************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+PLAY RECAP ****************************************************************************************************************************
+leaf1                      : ok=20   changed=3    unreachable=0    failed=0
+leaf2                      : ok=20   changed=3    unreachable=0    failed=0
+spine1                     : ok=23   changed=4    unreachable=0    failed=0
+spine2                     : ok=23   changed=4    unreachable=0    failed=0
+
+[arista@ansible ansible-training]$
+
+```
+
+With all of these roles and configs there is a lot of output. You can filter through this to see all the expected changes and log into the switches to view them.
+
+Once again running the playbook a second time does not make any changes because of the roles are idempotent.
+
+
+#### Step 6
+
+
+For our final step we will add some additional configurations that will only apply to our leaf switches. Update the leaf switches host_vars files as shown below:
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf1
+---
+hostname: dc1-leaf1
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: app2
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.10/32
+  - name: Ethernet2
+    address: 10.1.1.1/31
+  - name: Ethernet3
+    address: 10.1.2.1/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65002
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  listeners:
+    - name: 10.1.0.0/16
+      peer_group: demoleaf
+      remote_as: 65001
+
+mlag:
+    mlag_domain_id: mlag1
+    mlag_trunk_group: mlagpeer
+    mlag_shutdown: false
+    local_if_vlan: Vlan1024
+    local_if_ip_address: 10.0.0.1/30
+    local_if_disable_spanning_tree: true
+    peer_address: 10.0.0.2
+    peer_link_if: Port-Channel10
+    peer_link_mode: trunk
+    peer_link_lacp_mode: active
+    peer_link_enable: true
+    peer_link_members:
+      - Ethernet1
+
+virtual_mac_addr: "00:1c:73:00:00:99"
+
+varp_interfaces:
+  - vlanid: 1001
+    name: Varp_Vlan1001
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.1.3/24
+    virtual_addrs:
+      - 192.168.1.1
+  - vlanid: 1002
+    name: Varp_Vlan1002
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.2.3/24
+    virtual_addrs:
+      - 192.168.2.1
+[arista@ansible ansible-training]$
+```
+
+``` shell
+[arista@ansible ansible-training]$ cat inventory/host_vars/leaf2
+---
+hostname: dc1-leaf2
+
+vlans:
+  - vlanid: 1
+    name: default
+  - vlanid: 2
+    name: production
+
+interfaces:
+  - name: Loopback0
+    enable: true
+  - name: Ethernet2
+    description: "[BGP]Connection to spine1"
+    enable: true
+  - name: Ethernet3
+    description: "[BGP]Connection to spine2"
+    enable: true
+
+ip_interfaces:
+  - name: Loopback0
+    address: 1.1.1.11/32
+  - name: Ethernet2
+    address: 10.1.1.3/31
+  - name: Ethernet3
+    address: 10.1.2.3/31
+
+ipv4_static_routes:
+  - ip_dest: 0.0.0.0/0
+    next_hop: Management1
+    next_hop_ip: 172.16.130.2
+    route_name: Default
+    tag: 100
+
+bgp:
+  enable: true
+  bgp_as: 65002
+  redistribute:
+    - connected
+  log_neighbor_changes: yes
+  timers:
+    keep_alive: 1
+    hold: 3
+  listeners:
+    - name: 10.1.0.0/16
+      peer_group: demoleaf
+      remote_as: 65001
+
+mlag:
+    mlag_domain_id: mlag1
+    mlag_trunk_group: mlagpeer
+    mlag_shutdown: false
+    local_if_vlan: Vlan1024
+    local_if_ip_address: 10.0.0.2/30
+    local_if_disable_spanning_tree: true
+    peer_address: 10.0.0.1
+    peer_link_if: Port-Channel10
+    peer_link_mode: trunk
+    peer_link_lacp_mode: active
+    peer_link_enable: true
+    peer_link_members:
+      - Ethernet1
+
+virtual_mac_addr: "00:1c:73:00:00:99"
+
+varp_interfaces:
+  - vlanid: 1001
+    name: Varp_Vlan1001
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.1.4/24
+    virtual_addrs:
+      - 192.168.1.1
+  - vlanid: 1002
+    name: Varp_Vlan1002
+    description: My Vlan1001
+    enable: true
+    interface_addr: 192.168.2.4/24
+    virtual_addrs:
+      - 192.168.2.1
+[arista@ansible ansible-training]$
+```
+
+The new sections variable to role mappings are shown below:
+
+mlag - `arista.eos-mlag`
+virtual_mac_addr - `arista.eos-virtual-router`
+varp_interfaces - `arista.eos-virtual-router`
+
+Since these variable sections have only been added to the leaf switches host_vars/ lets add these roles to the `leaf.yml` playbook.
+
+``` yaml
+---
+- hosts: leafs
+  gather_facts: no
+  connection: local
+
+  roles:
+    - arista.eos-system
+    - arista.eos-bridging
+    - arista.eos-interfaces
+    - arista.eos-ipv4
+    - arista.eos-route-control
+    - arista.eos-bgp
+    - arista.eos-mlag
+    - arista.eos-virtual-router
+
+```
+
+Let's run our playbook one more time to complete our full site configuration.
+
+``` shell
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts_for_eos_roles site.yml
+
+PLAY [spines] *************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+PLAY [leafs] **************************************************************************************************************************
+
+... <output omitted for brevity> ...
+
+PLAY RECAP ****************************************************************************************************************************
+leaf1                      : ok=26   changed=6    unreachable=0    failed=0
+leaf2                      : ok=26   changed=6    unreachable=0    failed=0
+spine1                     : ok=18   changed=0    unreachable=0    failed=0
+spine2                     : ok=18   changed=0    unreachable=0    failed=0
+
+[arista@ansible ansible-training]$
+
+```
+
+After this most recent run only the leaf switches have changes. You can connect to these switches and run some show commands for mlag and varp to verify.
+
+We have just used Ansible to configure multiple features across a full site. With our variables set and simple playbooks that leverage pre-built roles we can configure or verify the configuration of a full site of devices.
+
+
+# Complete
+
+You have completed lab exercise 3.2
+
+---
