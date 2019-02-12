@@ -53,7 +53,7 @@ Let's try running `ansible-doc` for our new module. Make sure to use the `-M` op
 ERROR! module example_module missing documentation (or could not parse documentation): 'NoneType' object has no attribute 'get'
 ```
 
-The command returns an error, which is expected, because we haven't added our documentation strings yet. Let's do that now. Add some empty doc strings to `example_module.py`
+The command returns an error, which is expected, because we haven't added our documentation strings yet. Let's do that now. Add some empty doc strings to `library/example_module.py`
 
 ``` Python
 #!/usr/bin/python
@@ -127,7 +127,51 @@ Much better. You can also try running the `ansible-doc` command without the prev
 #### Step 3
 
 
+Now that we know our empty custom module can be found by Ansible, let's try adding it to a playbook. Create a new playbook called `test_example_module.yml` and add the following content:
 
+``` yaml
+---
+- name: TEST EXAMPLE MODULE
+  hosts: arista
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: RUN EXAMPLE MODULE
+      example_module:
+      register: result
+
+    - name: DISPLAY EXAMPLE MODULE RESULT
+      debug:
+        var: result
+```
+
+The playbook will be running our custom `example_module` and registering the output into a variable `result` that we will print with the built in `debug` module.
+
+Now let's run the new playbook.
+
+``` shell
+[arista@ansible ansible-training]$ ansible-playbook -i inventory/hosts test_example_module.yml --limit spine1
+
+PLAY [TEST EXAMPLE MODULE] ************************************************************************************************************
+
+TASK [RUN EXAMPLE MODULE] *************************************************************************************************************
+ok: [spine1]
+
+TASK [DISPLAY EXAMPLE MODULE RESULT] **************************************************************************************************
+ok: [spine1] => {
+    "result": {
+        "changed": false,
+        "failed": false
+    }
+}
+
+PLAY RECAP ****************************************************************************************************************************
+spine1                     : ok=2    changed=0    unreachable=0    failed=0
+
+```
+
+In three simple steps we have created a custom module and used it within a playbook. Let's continue by updating our module to do something more useful than the nothing it currently does.
 
 
 #### Step 4
