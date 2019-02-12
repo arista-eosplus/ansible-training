@@ -1,0 +1,38 @@
+---
+- name: NETWORKING FILTERS
+  hosts: arista
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+    - name: GATHER SWITCH FACTS
+      eos_facts:
+      tags:
+        - validate
+        - modify
+
+    - name: DISPLAY EXTRA ADDRESS AND EXTRA ROUTE
+      debug:
+        msg: 'Extra Address: {{ extra_address | default("None") }} Extra Route: {{ extra_route | default("None") }}'
+
+    - name: VALIDATE EACH EXTRA ADDRESS
+      debug:
+        msg: "{{ extra_address }} is IP: {{ extra_address | ipv4 }}"
+      when: extra_address is defined
+      tags: validate
+
+    - name: VALIDATE EACH EXTRA ROUTE
+      debug:
+        msg: "{{ extra_route }} is network range: {{ extra_route | ipaddr('net') }}"
+      when: extra_route is defined
+      tags: validate
+
+    - name: DISPLAY WHETHER VERSION IS VALID USING CUSTOM FILTER
+      debug:
+        msg: "VERSION VALID: {{ ansible_net_version | valid_eos_version }}"
+      tags: validate
+
+    - name: DISPLAY MODIFIED VERSION USING CUSTOM FILTER
+      debug:
+        msg: "MODIFIED VERSION NO ARGS: {{ ansible_net_version | a_simple_filter }} MODIFIED VERSION WITH ARGS: {{ ansible_net_version | a_simple_filter('extra1', 'extra2')}}"
+      tags: modify

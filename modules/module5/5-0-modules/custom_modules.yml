@@ -1,0 +1,33 @@
+---
+- name: DEMONSTRATE CUSTOM FILTERS
+  hosts: arista
+  connection: network_cli
+  gather_facts: no
+  vars:
+    invalid_version: 'invalid version'
+
+  tasks:
+    - name: GATHER SWITCH FACTS
+      eos_facts:
+
+    - name: DISPLAY VERSION
+      debug:
+        msg: "IPv4: {{ ansible_net_version }}"
+
+    - name: DISPLAY MODIFIED VERSION USING CUSTOM FILTER
+      debug:
+        msg: "MODIFIED VERSION: {{ ansible_net_version | a_simple_filter }}"
+
+    - name: DISPLAY WHETHER VERSION IS VALID USING CUSTOM FILTER
+      debug:
+        msg: "VERSION VALID: {{ ansible_net_version | valid_eos_version }}"
+
+    - name: ATTEMPT TO APPLY FILTER TO INVALID VALUE. CATCH ERROR
+      debug:
+        msg: "INVALID: {{ invalid_version | valid_eos_version }}"
+      register: expected_error
+      ignore_errors: True
+
+    - name: DISPLAY EXPECTED ERROR RETURNED FROM INVALID FILTER USAGE
+      debug:
+        msg: "EXPECTED ERROR: {{ expected_error }}"
