@@ -3,31 +3,15 @@
   hosts: arista
   connection: network_cli
   gather_facts: no
-  vars:
-    invalid_version: 'invalid version'
 
   tasks:
-    - name: GATHER SWITCH FACTS
-      eos_facts:
+    - name: RUN CUSTOM MODULE
+      my_custom_module:
+        option_one: '1'
+        option_two: 'notnone'
+        option_three: 'othervalue'
+      register: result
 
-    - name: DISPLAY VERSION
+    - name: DISPLAY CUSTOM MODULE RESULTS
       debug:
-        msg: "IPv4: {{ ansible_net_version }}"
-
-    - name: DISPLAY MODIFIED VERSION USING CUSTOM FILTER
-      debug:
-        msg: "MODIFIED VERSION: {{ ansible_net_version | a_simple_filter }}"
-
-    - name: DISPLAY WHETHER VERSION IS VALID USING CUSTOM FILTER
-      debug:
-        msg: "VERSION VALID: {{ ansible_net_version | valid_eos_version }}"
-
-    - name: ATTEMPT TO APPLY FILTER TO INVALID VALUE. CATCH ERROR
-      debug:
-        msg: "INVALID: {{ invalid_version | valid_eos_version }}"
-      register: expected_error
-      ignore_errors: True
-
-    - name: DISPLAY EXPECTED ERROR RETURNED FROM INVALID FILTER USAGE
-      debug:
-        msg: "EXPECTED ERROR: {{ expected_error }}"
+        msg: "{{ result }}"
