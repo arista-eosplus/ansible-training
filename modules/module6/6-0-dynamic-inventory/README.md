@@ -102,7 +102,7 @@ Run the script alone to see the output:
 #### Step 5
 
 
-Now before we attempt to run an Ansible playbook using the script to populate the inventory we need to make sure Ansible is able to use it. Change the scripts permissions so that it can be run by any user. We will simply by change the permissions to 777 level.
+Now before we attempt to run an Ansible playbook using the script to populate the inventory we need to make sure Ansible is able to use it. Change the scripts permissions so that it can be run by any user. We will simply change the permissions to 777 level.
 
 ``` shell
 [arista@ansible ansible-training]$ chmod 777 inventory/cvp_dynamic_inventory.py
@@ -352,7 +352,7 @@ PLAY RECAP *********************************************************************
 192.168.0.44               : ok=6    changed=0    unreachable=0    failed=0
 ```
 
-Simple as that we have used CVP to populate a dynamic inventory to execute our Ansible playbook against. If we were to add additional Arista devices to the inventory of CVP and rerun the ansible-playbook command, it would find these additional devices and run the plays/tasks against them as well.
+Simple as that we have used CVP to populate a dynamic inventory to execute our Ansible playbook against. If we were to add additional Arista devices to the inventory of CVP and re-run the ansible-playbook command, it would find these additional devices and run the plays/tasks against them as well.
 
 
 # Complete
