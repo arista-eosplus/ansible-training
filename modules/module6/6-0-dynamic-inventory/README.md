@@ -19,7 +19,7 @@ This can be found by clicking on CVP on the left side of your lab splash page. T
 
 We will also need to install a helpful python package for interacting with CVP via its API.
 
-execute the following command: The sudo password is arista.
+execute the following command:
 
 ``` shell
 [arista@ansible ansible-training]$ sudo pip install cvprac
