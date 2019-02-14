@@ -102,7 +102,7 @@ Run the script alone to see the output:
 #### Step 5
 
 
-Now before we attempt to run an Ansible playbook using the script to populate the inventory we need to make sure Ansible is able to use it. Change the scripts permissions so that it can be run by any user. We will do this simply by changes it to 777 permission level.
+Now before we attempt to run an Ansible playbook using the script to populate the inventory we need to make sure Ansible is able to use it. Change the scripts permissions so that it can be run by any user. We will simply by change the permissions to 777 level.
 
 ``` shell
 [arista@ansible ansible-training]$ chmod 777 inventory/cvp_dynamic_inventory.py
